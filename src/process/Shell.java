@@ -1,11 +1,10 @@
 package process;
 
 import console.ConsoleWindow;
-import helpers.AbstractProcess;
 
-public class shell extends AbstractProcess{
+public class Shell extends AbstractProcess{
 	
-	public shell (int Pid){
+	public Shell (int Pid){
 		new ConsoleWindow().runConsole();
 	}
 }
