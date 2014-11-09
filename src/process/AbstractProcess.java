@@ -1,10 +1,10 @@
-package helpers;
+package process;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
 
-public class AbstractProcess {
+public abstract class AbstractProcess {
 
 	private int Pid;
 	private Date startTime;

@@ -4,7 +4,7 @@
  */
 package kernel;
 
-import process.shell;
+//import process.Shell;
 
 /**
  * 
@@ -18,8 +18,8 @@ public class Kernel {
 	}
 
 	public void runShell() {
-		new shell(PID);
-		incrasePID();
+		//new Shell(PID);
+		//incrasePID();
 	  }
 	
 	public void incrasePID(){

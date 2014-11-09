@@ -1,5 +1,6 @@
 package console;
 
+import java.awt.*;
 import java.awt.event.KeyEvent;
 
 /**
@@ -13,7 +14,9 @@ public class ConsoleWindow extends javax.swing.JFrame {
 	 */
 	private static final long serialVersionUID = 1L;
 	private ConsoleHistory history;
-
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTextArea jTextArea1;
+    private String path = "shell# ";
     /**
      * Creates new form ConsoleWindow
      */
@@ -21,6 +24,7 @@ public class ConsoleWindow extends javax.swing.JFrame {
         this.history = new ConsoleHistory();
         initComponents();
     }
+
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -49,18 +53,12 @@ public class ConsoleWindow extends javax.swing.JFrame {
         });
         jScrollPane1.setViewportView(jTextArea1);
 
-        org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 480, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 300, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-        );
+        this.setSize(600,500);
+        this.setLocationRelativeTo(null);
+        jTextArea1.setText(path);
+        this.setLayout(new BorderLayout());
+        this.add(jTextArea1, BorderLayout.CENTER);
 
-        pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void jTextArea1KeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextArea1KeyPressed
@@ -68,21 +66,20 @@ public class ConsoleWindow extends javax.swing.JFrame {
             
             history.addCommandToHistory(getCommand());
             history.resetHistory();
+            jTextArea1.insert("\n" + path, jTextArea1.getCaretPosition());
         }
 
         if (evt.getKeyCode() == KeyEvent.VK_UP) {
-            jTextArea1.setText(history.up().getCurrentCommand());
-            }
+            jTextArea1.insert(history.up().getCurrentCommand(), jTextArea1.getCaretPosition());
+            jTextArea1.setCaretPosition(jTextArea1.getText().length() - 1);
+            jTextArea1.requestFocus();
+        }
 
         if (evt.getKeyCode() == KeyEvent.VK_DOWN) {
                 jTextArea1.setText(history.down().getCurrentCommand());
             }
         
-    }//GEN-LAST:event_jTextArea1KeyPressed
-
-        /**
-         * @param args the command line arguments
-         */
+    }
     
 
     public void runConsole() {
@@ -118,10 +115,9 @@ public class ConsoleWindow extends javax.swing.JFrame {
     }
 
     public String getCommand() {
-        return jTextArea1.getText();
+        return jTextArea1.getText().split("# ")[1];
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextArea jTextArea1;
+
     // End of variables declaration//GEN-END:variables
 }
