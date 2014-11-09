@@ -4,6 +4,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
 
+/**
+ * Abstract class which creates a primitive model for all the processes.
+ * @author Jan Blaha, Radek Bouda
+ * @version 1.0.0
+ */
 public abstract class AbstractProcess {
 
 	private int Pid;
