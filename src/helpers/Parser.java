@@ -1,41 +1,30 @@
-package src.helpers;
+package helpers;
 
 import java.util.ArrayList;
-//import java.util.Scanner;
 
+/**
+ * Instances of this class can parse user shell commands into separated commands.
+ * @author Jan Blaha, Radek Bouda
+ * @version 1.1
+ */
 public class Parser {
 
-//	private static String regexp;
+
 	private final static char PIPE = '|';
 	private final static char IN_REROUTE = '<';
 	private final static char OUT_REROUTE = '>';
 
-	private static String parsed_string;
-	private static int parsed_position;
-	private static char parsed_char;
-	private static boolean isFinished;
-	private static ArrayList<String> command = new ArrayList<String>();
-	private static ArrayList<ArrayList<String>> allCommands = new ArrayList<ArrayList<String>>();
-	private static String inputFile;
-	private static String outputFile;
+	private String parsed_string;
+	private int parsed_position;
+	private char parsed_char;
+	private boolean isFinished;
+	private ArrayList<String> command = new ArrayList<String>();
+	private ArrayList<ArrayList<String>> allCommands = new ArrayList<ArrayList<String>>();
+	private String inputFile;
+	private String outputFile;
 
-	/**
-	 * @param args
-	 */
-/*	public static void main(String[] args) {
-		if (args.length == 1) {
-			regexp = args[0];
-		} else {
-			Scanner sc = new Scanner(System.in);
-			System.out.print("Zadejte regularni vyraz: ");
-			regexp = sc.nextLine();
-		}
 
-		System.out.println(regexp);
-		parse(regexp);
-	}
-*/
-	public static void parse(String commandLine) {
+	public void parse(String commandLine) {
 		if (commandLine.equals("")) {
 			System.out.println("Parser received an empty command.");
 			return;
@@ -85,7 +74,7 @@ public class Parser {
 		}	
 	}
 
-	private static ArrayList<String> getCommand() {
+	private ArrayList<String> getCommand() {
 		ArrayList<String> result = new ArrayList<String>();
 		String word;
 		do {
@@ -105,7 +94,7 @@ public class Parser {
 		return result;
 	}
 
-	private static String getReroutes() {
+	private String getReroutes() {
 		String result = "";
 		consumeWhiteSpaces();
 		if (isFinished || parsed_char == IN_REROUTE
@@ -122,13 +111,13 @@ public class Parser {
 		return result;
 	}
 
-	private static void consumeWhiteSpaces() {
+	private void consumeWhiteSpaces() {
 		while (!isFinished && Character.isWhitespace(parsed_char)) {
 			nextChar();
 		}
 	}
 
-	private static void nextChar() {
+	private void nextChar() {
 		if (parsed_position + 1 == parsed_string.length()) {
 			parsed_char = '\0';
 			isFinished = true;
@@ -138,23 +127,23 @@ public class Parser {
 		}
 	}
 
-	public static String getInputFile() {
+	public String getInputFile() {
 		return inputFile;
 	}
 
-	public static String getOutputFile() {
+	public String getOutputFile() {
 		return outputFile;
 	}
 
-	public static ArrayList<ArrayList<String>> getAllCommands() {
+	public ArrayList<ArrayList<String>> getAllCommands() {
 		return allCommands;
 	}
 
-	public static void setInputFile(String inputFile) {
-		Parser.inputFile = inputFile;
+	public void setInputFile(String inputFile) {
+		this.inputFile = inputFile;
 	}
 
-	public static void setOutputFile(String outputFile) {
-		Parser.outputFile = outputFile;
+	public void setOutputFile(String outputFile) {
+		this.outputFile = outputFile;
 	}
 }
