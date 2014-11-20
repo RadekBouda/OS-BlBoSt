@@ -15,6 +15,6 @@ public class Run {
      * @param args The command line arguments. Not used.
      */
     public static void main(String[] args) {
-        new Kernel().runShell();
+        Kernel.getInstance().runShell();
     }
 }
