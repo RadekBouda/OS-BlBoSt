@@ -1,26 +1,32 @@
 package console;
 
+import process.Shell;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
+// TODO: Scrolling
+
 /**
  * Console - the part of ConsoleWindow where text and IO appears.
- * Created by Radek Bouda on 9. 11. 2014.
+ * Created by Radek Bouda, David Steinberger on 9. 11. 2014.
  */
 public class Console extends JTextPane{
+    private final Shell shell;          // Shell reference
     private ConsoleHistory history = new ConsoleHistory();
     private String path = "shell# ";
 
 
-    public Console(){
-        this.setBackground(new Color(0,0,0));
-        this.setForeground(new Color(255,255,51));
-        this.setCaretColor(new Color(255,255,51));
+    public Console(Shell shell){
+        this.setBackground(new Color(0, 0, 0));
+        this.setForeground(new Color(255, 255, 51));
+        this.setCaretColor(new Color(255, 255, 51));
         this.addKeyListener(new CommandsKeyListener());
         this.setText(path);
         this.setCaretPosition(this.getText().length());
+        this.shell = shell;
     }
 
     /**
@@ -28,9 +34,10 @@ public class Console extends JTextPane{
      * @return Submitted command as a string, null otherwise (empty command)
      */
     public String getCommand() {
-        if(getText().split("\n")[getText().split("\n").length-1].split("# ").length == 1) return null;
+        String split[] = getText().split("\n");
+        if(split[split.length-1].split("# ").length == 1) return null;
 
-        return getText().split("\n")[getText().split("\n").length-1].split("# ")[1];
+        return split[split.length-1].split("# ")[1];
     }
 
     /**
@@ -39,6 +46,7 @@ public class Console extends JTextPane{
      */
     public void printNewLine(String text){
         this.setText(this.getText() + "\n" + text);
+        this.setText(this.getText() + "\n" + path);
     }
 
     /**
@@ -64,8 +72,9 @@ public class Console extends JTextPane{
      * This method checks whether is the caret behind the hashmark of the last line or not.
      * @return True if it is, false otherwise.
      */
-    private boolean isCaretWhereItShouldBe(){
-        int lastRowLength = getText().split("\n")[getText().split("\n").length-1].length();
+    private boolean isCaretWhereItShouldBe() {
+        String split[] = getText().split("\n");
+        int lastRowLength = split[split.length-1].length();
         int totalLength = getText().length();
 
         if(getCaretPosition() < totalLength - lastRowLength + path.length()){
@@ -102,15 +111,15 @@ public class Console extends JTextPane{
                 //Executing command
                 case KeyEvent.VK_ENTER:
                     e.consume();
-
-                    if(getCommand() == null){
+                    String command = getCommand();
+                    if(command == null){
                         printNewLine(path);
                         return;
                     }
-
-                    history.addCommandToHistory(getCommand());
+                    history.addCommandToHistory(command);
                     history.resetHistory();
-                    printNewLine(path);
+
+                    shell.executeCommand(command);  // Shell executes command
                     break;
                 //Printing previous command
                 case KeyEvent.VK_UP:

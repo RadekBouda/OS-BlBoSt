@@ -1,14 +1,16 @@
 package helpers;
 
 import java.util.ArrayList;
+import java.util.List;
+
+// TODO: Clear console output
 
 /**
  * Instances of this class can parse user shell commands into separated commands.
- * @author Jan Blaha, Radek Bouda
+ * @author Jan Blaha, Radek Bouda, David Steinberger
  * @version 1.1
  */
 public class Parser {
-
 
 	private final static char PIPE = '|';
 	private final static char IN_REROUTE = '<';
@@ -18,13 +20,16 @@ public class Parser {
 	private int parsed_position;
 	private char parsed_char;
 	private boolean isFinished;
-	private ArrayList<String> command = new ArrayList<String>();
-	private ArrayList<ArrayList<String>> allCommands = new ArrayList<ArrayList<String>>();
+	private List<String> command = new ArrayList<String>();
+	private List<List<String>> allCommands = new ArrayList<List<String>>();
 	private String inputFile;
 	private String outputFile;
 
+	public Parser(String line) {
+		parse(line);
+	}
 
-	public void parse(String commandLine) {
+	private void parse(String commandLine) {
 		if (commandLine.equals("")) {
 			System.out.println("Parser received an empty command.");
 			return;
@@ -63,7 +68,7 @@ public class Parser {
 			allCommands.add(command);
 			consumeWhiteSpaces();
 		}
-		
+
 		while (parsed_char == OUT_REROUTE) {
 			nextChar();
 			outputFile = getReroutes();
@@ -71,7 +76,7 @@ public class Parser {
 				System.out.println("Parser couldn't parse the standard output file reroute.");
 			}
 			consumeWhiteSpaces();
-		}	
+		}
 	}
 
 	private ArrayList<String> getCommand() {
@@ -135,7 +140,7 @@ public class Parser {
 		return outputFile;
 	}
 
-	public ArrayList<ArrayList<String>> getAllCommands() {
+	public List<List<String>> getAllCommands() {
 		return allCommands;
 	}
 
