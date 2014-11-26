@@ -49,15 +49,6 @@ public class Parser {
 
 		consumeWhiteSpaces();
 
-		while (parsed_char == IN_REROUTE) {
-			nextChar();
-			inputFile = getReroutes();
-			if (inputFile.length() == 0) {
-				System.out.println("Parser couldn't parse the standard input file reroute.");
-			}
-			consumeWhiteSpaces();
-		}
-
 		while (parsed_char == PIPE) {
 			nextChar();
 			command = getCommand();
@@ -66,6 +57,15 @@ public class Parser {
 				return;
 			}
 			allCommands.add(command);
+			consumeWhiteSpaces();
+		}
+
+		while (parsed_char == IN_REROUTE) {
+			nextChar();
+			inputFile = getReroutes();
+			if (inputFile.length() == 0) {
+				System.out.println("Parser couldn't parse the standard input file reroute.");
+			}
 			consumeWhiteSpaces();
 		}
 

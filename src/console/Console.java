@@ -8,6 +8,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
 // TODO: Scrolling
+// TODO: Singnals (CTRL+C)
 
 /**
  * Console - the part of ConsoleWindow where text and IO appears.

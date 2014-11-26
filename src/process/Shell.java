@@ -4,8 +4,8 @@ import console.Console;
 import console.ConsoleWindow;
 import helpers.Parser;
 
-import java.io.IOException;
-import java.io.PipedInputStream;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -42,8 +42,43 @@ public class Shell extends AbstractProcess {
 		Parser parser = new Parser(line);   // Parses the line
 		commands = parser.getAllCommands();
 		this.input = new PipedInputStream(4194304);
+		redirectInput(parser.getInputFile());
 		callSubProcess();
-		console.printNewLine(getStringFromInput());
+		redirectOutput(parser.getOutputFile(), getStringFromInput());
+	}
+
+	/**
+	 * Redirects output.
+	 *
+	 * @param output file
+	 * @param txt content
+	 */
+	private void redirectOutput(String output, String txt) {
+		if(output != null) {
+			try {
+				BufferedWriter bfw = new BufferedWriter(new FileWriter(new File(output)));
+				bfw.write(txt);
+				bfw.close();
+				console.printNewLine("");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} else console.printNewLine(txt);
+	}
+
+	/**
+	 * Redirects input using Cat process.
+	 *
+	 * @param input input file
+	 */
+	private void redirectInput(String input) {
+		if(input == null) return;						// No redirect needed
+		int last = commands.size() - 1;					// Last command
+		commands = commands.subList(last, last + 1);	// Redirect is possible only on the last command. Previous commands are discarded.
+		List<String> cat = new ArrayList<String>();		// Create cat process
+		cat.add("cat");
+		cat.add(input);
+		commands.add(0, cat);							// Adds to first position in commands
 	}
 
 	/**
