@@ -2,6 +2,7 @@ package console;
 
 import process.Shell;
 
+import javax.swing.*;
 import java.awt.*;
 
 // TODO: Default close operation = close Shell.
@@ -43,7 +44,10 @@ public class ConsoleWindow extends javax.swing.JFrame {
         this.setTitle("OS Simulator - BlBoSt Team");
         this.setSize(600,500);
         this.setLayout(new BorderLayout());
-        this.add(console, BorderLayout.CENTER);
+
+        JScrollPane jsp = new JScrollPane(console);
+
+        this.add(jsp, BorderLayout.CENTER);
 
     }
 
