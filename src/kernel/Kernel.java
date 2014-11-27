@@ -101,7 +101,8 @@ public class Kernel {
 			processes.put(proc.getPid(), proc);							// Adds to the process table
 			return proc;												// Returns the process
 		} catch (ClassNotFoundException e) {				// TODO: Wrong arguments etc.
-			e.printStackTrace();
+			System.out.println(process + " is not a valid process");
+			return null;
 		} catch (InvocationTargetException e) {
 			e.printStackTrace();
 		} catch (NoSuchMethodException e) {

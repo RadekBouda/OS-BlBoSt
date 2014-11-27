@@ -110,6 +110,11 @@ public abstract class AbstractProcess extends Thread {
 			for (int i = 3, j = 1; i < arguments; i++, j++) args[i] = commands.get(position).get(j);
 		}
 		AbstractProcess process = Kernel.getInstance().newProcess(commands.get(position).get(0), args);	// Get process from kernel
+
+		if(process == null){
+			return;
+		}
+
 		process.setParentPid(pid);							// Set parent pid
 		addChildPid(process.getPid());
 		process.run();										// Launch process
@@ -133,7 +138,9 @@ public abstract class AbstractProcess extends Thread {
 		try {
 			int c;
 			StringBuilder builder = new StringBuilder();
-			while ((c = input.read()) != -1) builder.append((char) c);
+			while ((c = input.read()) != -1){
+				if(c != '\r'){ builder.append((char) c);}
+			}
 			return builder.toString();
 		} catch (IOException e) {
 			return null;
