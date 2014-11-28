@@ -27,6 +27,8 @@ public class Console extends JTextPane implements Runnable {
     private PipedOutputStream output;
     /** State of console (inside command or not)  */
     private boolean inCommand;
+    /** This constant defines, how many lines are stored in memory. */
+    private static final int LINES_CNT_TO_MEMORIZE = 115;
 
     /**
      * Creates new console instance.
@@ -90,8 +92,13 @@ public class Console extends JTextPane implements Runnable {
     private void removeLastLineInConsole(){
         String[] data = getText().split("\n");
         setText("");
-        for (int i = 0; i < data.length - 1; i++){
+
+        int i = data.length - LINES_CNT_TO_MEMORIZE;
+        if(i < 0) i = 0;
+
+        while(i < (data.length - 1)){
             setText(getText() + data[i] + "\n");
+            i++;
         }
     }
 
