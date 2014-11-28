@@ -10,8 +10,6 @@ import java.io.IOException;
 import java.io.PipedOutputStream;
 
 // TODO: Singnals (CTRL+C etc.)
-// TODO: Fix caret behaviour
-// TODO: Autoscroll in case of long output using printNewLine method
 
 /**
  * Console - the part of ConsoleWindow where text and IO appears.
@@ -65,6 +63,7 @@ public class Console extends JTextPane implements Runnable {
      */
     public void printNewLine(String text){
         this.setText(this.getText() + "\n" + text);
+        setCaretPosition(getText().length());
     }
 
     /**
