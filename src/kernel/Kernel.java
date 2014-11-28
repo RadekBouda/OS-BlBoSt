@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.PipedInputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import java.util.Map;
 /**
  * Instance of this class represents the kernel of an operating system.
  * Class is designed according to SINGLETON design pattern.
+ *
  * @author Jan Blaha, Radek Bouda, David Steinberger
  * @version 1.1
  */
@@ -63,7 +65,7 @@ public class Kernel {
 	 * Runs main shell.
 	 */
 	public void runShell() {
-		AbstractProcess shell = new Shell(PID, null, null);
+		AbstractProcess shell = new Shell(PID, null, new ArrayList<List<String>>(), null);
 		processes.put(shell.getPid(), shell);
 		shell.run();
 		increasePID();
@@ -79,9 +81,9 @@ public class Kernel {
 	/**
 	 * Creates a new process with given name and arguments.
 	 *
-	 * @param process
-	 * @param arguments
-	 * @return
+	 * @param process process name
+	 * @param arguments constructor parameters
+	 * @return process
 	 */
 	public AbstractProcess newProcess(String process, Object[] arguments) {
 		try {
@@ -91,7 +93,8 @@ public class Kernel {
 			types[0] = int.class;										// First always pid
 			types[1] = PipedInputStream.class;							// Second always input stream
 			types[2] = List.class;										// Third always List with rest of commands
-			for(int i = 3; i < arguments.length; i++) types[i] = arguments[i].getClass();	// Fills optional arguments
+			types[3] = Shell.class;
+			for(int i = 4; i < arguments.length; i++) types[i] = arguments[i].getClass();	// Fills optional arguments
 			Constructor constructor = myClass.getConstructor(types);				// Gets constructor with given types.
 
 			arguments[0] = PID;			// Sets the pid

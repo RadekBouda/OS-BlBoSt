@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 
 // TODO: Default close operation = close Shell.
+// TODO: Killing the console thread.
 
 /**
  * Instances of this class represent concrete windows with Console.
@@ -35,7 +36,8 @@ public class ConsoleWindow extends javax.swing.JFrame {
 
         jScrollPane1 = new javax.swing.JScrollPane();
         console = new Console(shell);
-
+        Thread consoleThread = new Thread(console);
+        consoleThread.run();
 
         this.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);

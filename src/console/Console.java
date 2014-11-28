@@ -6,19 +6,35 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.IOException;
+import java.io.PipedOutputStream;
 
-// TODO: Singnals (CTRL+C)
+// TODO: Singnals (CTRL+C etc.)
+// TODO: Fix caret behaviour
+// TODO: Autoscroll in case of long output using printNewLine method
 
 /**
  * Console - the part of ConsoleWindow where text and IO appears.
+ *
  * Created by Radek Bouda, David Steinberger on 9. 11. 2014.
  */
-public class Console extends JTextPane{
-    private final Shell shell;          // Shell reference
+public class Console extends JTextPane implements Runnable {
+    /** Own shell reference */
+    private final Shell shell;
+    /** Commands history */
     private ConsoleHistory history = new ConsoleHistory();
+    /** Line prefix */
     private String path = "shell# ";
+    /** Stream with shell */
+    private PipedOutputStream output;
+    /** State of console (inside command or not)  */
+    private boolean inCommand;
 
-
+    /**
+     * Creates new console instance.
+     *
+     * @param shell own shell
+     */
     public Console(Shell shell){
         this.setBackground(new Color(0, 0, 0));
         this.setForeground(new Color(255, 255, 51));
@@ -26,7 +42,10 @@ public class Console extends JTextPane{
         this.addKeyListener(new CommandsKeyListener());
         this.setText(path);
         this.setCaretPosition(this.getText().length());
+        this.output = new PipedOutputStream();
         this.shell = shell;
+        this.shell.setConsoleInput(output);
+        this.inCommand = false;
     }
 
     /**
@@ -46,7 +65,16 @@ public class Console extends JTextPane{
      */
     public void printNewLine(String text){
         this.setText(this.getText() + "\n" + text);
-        this.setText(this.getText() + "\n" + path);
+    }
+
+    /**
+     * Prints results and path prefix on a new line.
+     *
+     * @param text
+     */
+    public void printResults(String text) {
+        printNewLine(text);
+        printNewLine(path);
     }
 
     /**
@@ -86,58 +114,114 @@ public class Console extends JTextPane{
     }
 
     /**
+     * Empty run... Just listening keyboard.
+     */
+    @Override
+    public void run() {}
+
+    /**
      * Private adapter which describes how to manipulate with keys, when they are pressed.
      * Special behavior for Return, Left, Right and BackSpace keys.
-     * @author Radek Bouda
+     * @author Radek Bouda, David Steinberger
      * @version 1.0.0
      */
     private class CommandsKeyListener extends KeyAdapter {
+
         @Override
         public void keyPressed(KeyEvent e) {
-
-            if(!isCaretWhereItShouldBe()){ // if caret is somewhere where it should not be
-                setCaretPosition(getText().length()); // we put it somewhere where it should be
-            }
-
-            //Disable deleting with a back space and moving of a caret in front of the hashmark
-            if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE || e.getKeyCode() == KeyEvent.VK_LEFT) {
-                if(getText().toCharArray()[getCaretPosition() - 1] == ' ' && getText().toCharArray()[getCaretPosition() - 2] == '#'){
-                    e.consume();
+                if (!isCaretWhereItShouldBe()) { // if caret is somewhere where it should not be
+                    setCaretPosition(getText().length()); // we put it somewhere where it should be
                 }
-                return;
-            }
 
-            switch (e.getKeyCode() ) {
-                //Executing command
-                case KeyEvent.VK_ENTER:
-                    e.consume();
-                    String command = getCommand();
-                    if(command == null){
-                        printNewLine(path);
-                        return;
+                //Disable deleting with a back space and moving of a caret in front of the hashmark
+                if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE || e.getKeyCode() == KeyEvent.VK_LEFT) {
+                    if (getText().toCharArray()[getCaretPosition() - 1] == ' ' && getText().toCharArray()[getCaretPosition() - 2] == '#') {
+                        e.consume();
                     }
-                    history.addCommandToHistory(command);
-                    history.resetHistory();
-
-                    shell.executeCommand(command);  // Shell executes command
-                    break;
-                //Printing previous command
-                case KeyEvent.VK_UP:
-                    e.consume();
-                    removeLastLineInConsole();
-                    print(path + history.up().getCurrentCommand());
-                    break;
-                //Printing next command
-                case KeyEvent.VK_DOWN:
-                    e.consume();
-                    removeLastLineInConsole();
-                    print(path + history.down().getCurrentCommand());
-                    break;
-                default:
-                    break;
+                    return;
+                }
+            // Check console state
+            if(!inCommand) {
+                outsideCommandBehaviour(e);
+            } else {
+                insideCommandBehaviour(e);
             }
         }
     }
 
+    /**
+     * Behaviour inside a command. Just copy stdin into pipe.
+     *
+     * Signals: Ctrl-D - stop listening
+     *
+     * @param e key event
+     */
+    private void insideCommandBehaviour(KeyEvent e) {
+        try {
+            if(e.isControlDown() && e.getKeyCode() == KeyEvent.VK_D) {
+                output.write(0);
+            } else {
+                output.write(e.getKeyCode());
+            }
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+    }
+
+    /**
+     * Behaviour outside a command.
+     *
+     * Supported keys:  Enter - consume a command
+     *                  Up - Back in history
+     *                  Down - Forward in history
+     *
+     * @param e key event
+     */
+    private void outsideCommandBehaviour(KeyEvent e) {
+        switch (e.getKeyCode()) {
+            //Executing command
+            case KeyEvent.VK_ENTER:
+                e.consume();
+                String command = getCommand();
+                if (command == null) {
+                    printNewLine(path);
+                    return;
+                }
+                history.addCommandToHistory(command);
+                history.resetHistory();
+                try {
+                    output.write((command + '\n').getBytes());  // Shell is waiting for '\n' to execute the command
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+                break;
+            //Printing previous command
+            case KeyEvent.VK_UP:
+                e.consume();
+                removeLastLineInConsole();
+                print(path + history.up().getCurrentCommand());
+                break;
+            //Printing next command
+            case KeyEvent.VK_DOWN:
+                e.consume();
+                removeLastLineInConsole();
+                print(path + history.down().getCurrentCommand());
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * Set the state of the console.
+     *
+     * States:  true - inside command
+     *          false - outside command
+     *
+     * @param in true/false
+     */
+    public void setInCommand(boolean in) {
+        inCommand = in;
+    }
 
 }

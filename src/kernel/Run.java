@@ -4,6 +4,8 @@
  */
 package kernel;
 
+// TODO: Manage exceptions in whole project!
+
 /**
  * Main class of the simulator.
  * @author Jan Blaha

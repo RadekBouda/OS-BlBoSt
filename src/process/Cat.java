@@ -3,8 +3,6 @@ package process;
 import java.io.*;
 import java.util.List;
 
-// TODO: UTF-8!
-
 /**
  * Cat process reads files.
  *
@@ -23,8 +21,8 @@ public class Cat extends AbstractProcess {
      * @param commands List of commands
      * @param path Path to file
      */
-    public Cat(int Pid, PipedInputStream input, List<List<String>> commands, String path) {
-        super(Pid, input, commands);
+    public Cat(int Pid, PipedInputStream input, List<List<String>> commands, Shell shell, String path) {
+        super(Pid, input, commands, shell);
         this.path = path;
     }
 

@@ -19,6 +19,8 @@ public class Shell extends AbstractProcess {
 	private final ConsoleWindow consoleWindow;
 	/** Console */
 	private final Console console;
+	/** Console input pipe */
+	private PipedInputStream consoleInput;
 
 	/**
 	 * Create new shell with own window.
@@ -27,8 +29,9 @@ public class Shell extends AbstractProcess {
 	 * @param input PipedInputStream
 	 * @param commands list of commands
 	 */
-	public Shell (int pid, PipedInputStream input, List<List<String>> commands){
-		super(pid, input, commands);
+	public Shell (int pid, PipedInputStream input, List<List<String>> commands, Shell shell){
+		super(pid, input, commands, shell);
+		if(pid == 0) this.shell = this;
 		this.consoleWindow = new ConsoleWindow(this);
 		this.console = consoleWindow.console;
 	}
@@ -39,14 +42,17 @@ public class Shell extends AbstractProcess {
 	 * @param line command
 	 */
 	public void executeCommand(String line) {
-		Parser parser = new Parser(line);   // Parses the line
+		console.setInCommand(true);				// Console inside command
+		Parser parser = new Parser(line);   	// Parses the line
 		commands = parser.getAllCommands();
 		this.input = new PipedInputStream(4194304);
 		redirectInput(parser.getInputFile());
 		callSubProcess();
 		redirectOutput(parser.getOutputFile(), getStringFromInput());
+		console.setInCommand(false);			// Console outside command
 	}
 
+	// TODO: UTF-8!
 	/**
 	 * Redirects output.
 	 *
@@ -59,11 +65,11 @@ public class Shell extends AbstractProcess {
 				BufferedWriter bfw = new BufferedWriter(new FileWriter(new File(output)));
 				bfw.write(txt);
 				bfw.close();
-				console.printNewLine("");
+				console.printResults("");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		} else console.printNewLine(txt);
+		} else console.printResults(txt);
 	}
 
 	/**
@@ -87,9 +93,57 @@ public class Shell extends AbstractProcess {
 	@Override
 	protected void processRun() {
 		try {
-			output.close();
+			int c;
+			while(true) {										// Infinite loop
+				StringBuilder builder = new StringBuilder();
+				c = consoleInput.read();
+				while (c != -1 && c != '\n') {					// End of pipe or end of line
+					builder.append((char) c);
+					c = consoleInput.read();
+				}
+				if(c == '\n') console.printNewLine("");			// Print new line also on console
+				if (c == -1) {
+					output.close();								// Doesn't block parent shell!
+					return;
+				}
+				executeCommand(builder.toString());				// Executes parsed commands
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * Lets console set its output.
+	 *
+	 * @param output console output
+	 */
+	public void setConsoleInput(PipedOutputStream output) {
+		try {
+			consoleInput = new PipedInputStream(output);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Get line from console.
+	 *
+	 * @return line
+	 */
+	public String getLine() {
+		int c;
+		StringBuilder builder = new StringBuilder();
+		try {
+			c = consoleInput.read();
+			while (c != -1 && c != '\n' && c != 0) {		// 0 - represents Control - D signal
+				builder.append((char) c);
+				c = consoleInput.read();
+			}
+			if(c == 0) return null;							// Finishes stdin
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return builder.toString();							// Loaded string
 	}
 }

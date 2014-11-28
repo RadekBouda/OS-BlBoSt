@@ -18,8 +18,8 @@ public class Wc extends AbstractProcess {
      * @param input PipedInputStream
      * @param commands list with commands
      */
-    public Wc(int pid, PipedInputStream input, List<List<String>> commands) {
-        super(pid, input, commands);
+    public Wc(int pid, PipedInputStream input, List<List<String>> commands, Shell shell) {
+        super(pid, input, commands, shell);
     }
 
     /**
@@ -27,9 +27,34 @@ public class Wc extends AbstractProcess {
      */
     @Override
     protected void processRun() {
+        if(hasPipedInput()) {
+            pipedInput();
+        } else {
+            stdInput();
+        }
+    }
+
+    /**
+     * Piped input version. Reads from pipe.
+     */
+    private void pipedInput() {
         try {
             String text = getStringFromInput();
             output.write((text.split("\n").length + "").getBytes());
+            output.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Stdin version. Reads from stdin.
+     */
+    private void stdInput() {
+        try {
+            int count = 0;
+            while(shell.getLine() != null) count++;
+            output.write(("" + count).getBytes());
             output.close();
         } catch (IOException e) {
             e.printStackTrace();
