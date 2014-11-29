@@ -3,6 +3,7 @@ package process;
 import console.Console;
 import console.ConsoleWindow;
 import helpers.Parser;
+import kernel.Run;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ public class Shell extends AbstractProcess {
 	private int depth;
 
 	/** Virtual filesystem location */
-	private static final String PATH_PREFIX = "filesystem/";
+	private static final String PATH_PREFIX = "filesystem" + File.separatorChar;
 
 	/**
 	 * Create new shell with own window.
@@ -46,7 +47,7 @@ public class Shell extends AbstractProcess {
 		try {
 			this.root = new File(PATH_PREFIX).getCanonicalPath();
 			this.path = this.root;
-			this.depth = this.root.split("/").length;
+			this.depth = this.root.split(Run.getPathSeparatorForSplit()).length;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -192,8 +193,8 @@ public class Shell extends AbstractProcess {
 	 */
 	public String getPath(String path) {
 		try {
-			String file = new File(this.path + '/' + path).getCanonicalPath();
-			if(file.split("/").length < depth) return null;			// Checking borders
+			String file = new File(this.path + File.separatorChar + path).getCanonicalPath().replaceAll(";", "");
+			if(file.split(Run.getPathSeparatorForSplit()).length < depth) return null;			// Checking borders
 			return file;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -231,6 +232,7 @@ public class Shell extends AbstractProcess {
 				return;
 			}
 			File folder = new File(path);
+			System.out.println(path);
 			if(!folder.exists()) {
 				console.printResults("No such a file or directory!");
 			} else {
@@ -238,7 +240,7 @@ public class Shell extends AbstractProcess {
 					console.printResults("Not a directory!");
 				} else {
 					setPath(folder.getCanonicalPath());
-					console.printResults(getPath(""));
+					console.printResults("");
 				}
 			}
 		} catch (IOException e) {
@@ -259,7 +261,7 @@ public class Shell extends AbstractProcess {
 	 * @return BBShell:location user$
 	 */
 	public String getConsolePrefix() {
-		String parts[] = path.split("/");
+		String parts[] = path.split(Run.getPathSeparatorForSplit());
 		return "BBShell:" + parts[parts.length-1] + " root$ ";
 	}
 }
