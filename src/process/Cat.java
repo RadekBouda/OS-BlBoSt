@@ -16,14 +16,14 @@ public class Cat extends AbstractProcess {
     /**
      * Create new process.
      *
-     * @param Pid Process ID
+     * @param pid Process ID
      * @param input PipedInputStream
      * @param commands List of commands
      * @param path Path to file
      */
-    public Cat(int Pid, PipedInputStream input, List<List<String>> commands, Shell shell, String path) {
-        super(Pid, input, commands, shell);
-        this.path = path;
+    public Cat(int pid, PipedInputStream input, List<List<String>> commands, Shell shell, String path) {
+        super(pid, input, commands, shell);
+        this.path = shell.getPath(path);
     }
 
     /**
@@ -33,7 +33,7 @@ public class Cat extends AbstractProcess {
     protected void processRun() {
         try {
             int c;
-            BufferedReader reader = new BufferedReader(new FileReader(new File(path.toString())));
+            BufferedReader reader = new BufferedReader(new FileReader(new File(path)));
             while((c = reader.read()) != -1) output.write(c);
             output.close();
         } catch (FileNotFoundException e) {

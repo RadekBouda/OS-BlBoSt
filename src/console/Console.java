@@ -21,8 +21,6 @@ public class Console extends JTextPane implements Runnable {
     private final Shell shell;
     /** Commands history */
     private ConsoleHistory history = new ConsoleHistory();
-    /** Line prefix */
-    private String path = "shell# ";
     /** Stream with shell */
     private PipedOutputStream output;
     /** State of console (inside command or not)  */
@@ -40,7 +38,7 @@ public class Console extends JTextPane implements Runnable {
         this.setForeground(new Color(255, 255, 51));
         this.setCaretColor(new Color(255, 255, 51));
         this.addKeyListener(new CommandsKeyListener());
-        this.setText(path);
+        this.setText("");
         this.setCaretPosition(this.getText().length());
         this.output = new PipedOutputStream();
         this.shell = shell;
@@ -54,9 +52,9 @@ public class Console extends JTextPane implements Runnable {
      */
     public String getCommand() {
         String split[] = getText().split("\n");
-        if(split[split.length-1].split("# ").length == 1) return null;
+        if(split[split.length-1].split("\\$ ").length == 1) return null;
 
-        return split[split.length-1].split("# ")[1];
+        return split[split.length-1].split("\\$ ")[1];
     }
 
     /**
@@ -71,11 +69,21 @@ public class Console extends JTextPane implements Runnable {
     /**
      * Prints results and path prefix on a new line.
      *
-     * @param text
+     * @param text result
      */
     public void printResults(String text) {
-        printNewLine(text);
-        printNewLine(path);
+        if(!text.equals("")) printNewLine(text);
+        printNewLine(shell.getConsolePrefix());
+    }
+
+    /**
+     * Print first line to start console. Welcome text!
+     *
+     * @param text first line
+     */
+    public void startConsole(String text) {
+        this.setText(text);
+        setCaretPosition(getText().length());
     }
 
     /**
@@ -111,7 +119,7 @@ public class Console extends JTextPane implements Runnable {
         int lastRowLength = split[split.length-1].length();
         int totalLength = getText().length();
 
-        if(getCaretPosition() < totalLength - lastRowLength + path.length()){
+        if(getCaretPosition() < totalLength - lastRowLength + shell.getConsolePrefix().length()){
             return false;
         }
 
@@ -141,7 +149,7 @@ public class Console extends JTextPane implements Runnable {
 
                 //Disable deleting with a back space and moving of a caret in front of the hashmark
                 if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE || e.getKeyCode() == KeyEvent.VK_LEFT) {
-                    if (getText().toCharArray()[getCaretPosition() - 1] == ' ' && getText().toCharArray()[getCaretPosition() - 2] == '#') {
+                    if (getText().toCharArray()[getCaretPosition() - 1] == ' ' && getText().toCharArray()[getCaretPosition() - 2] == '$') {
                         e.consume();
                     }
                     return;
@@ -190,7 +198,7 @@ public class Console extends JTextPane implements Runnable {
                 e.consume();
                 String command = getCommand();
                 if (command == null) {
-                    printNewLine(path);
+                    printNewLine(shell.getConsolePrefix());
                     return;
                 }
                 history.addCommandToHistory(command);
@@ -205,13 +213,13 @@ public class Console extends JTextPane implements Runnable {
             case KeyEvent.VK_UP:
                 e.consume();
                 removeLastLineInConsole();
-                print(path + history.up().getCurrentCommand());
+                print(shell.getConsolePrefix() + history.up().getCurrentCommand());
                 break;
             //Printing next command
             case KeyEvent.VK_DOWN:
                 e.consume();
                 removeLastLineInConsole();
-                print(path + history.down().getCurrentCommand());
+                print(shell.getConsolePrefix() + history.down().getCurrentCommand());
                 break;
             default:
                 break;

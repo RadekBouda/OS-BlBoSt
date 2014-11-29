@@ -21,6 +21,15 @@ public class Shell extends AbstractProcess {
 	private final Console console;
 	/** Console input pipe */
 	private PipedInputStream consoleInput;
+	/** Current path */
+	private String path;
+	/** Root path */
+	private String root;
+	/** Minimal depth - used for validation of virtual filesystem path location */
+	private int depth;
+
+	/** Virtual filesystem location */
+	private static final String PATH_PREFIX = "filesystem/";
 
 	/**
 	 * Create new shell with own window.
@@ -34,6 +43,14 @@ public class Shell extends AbstractProcess {
 		if(pid == 0) this.shell = this;
 		this.consoleWindow = new ConsoleWindow(this);
 		this.console = consoleWindow.console;
+		try {
+			this.root = new File(PATH_PREFIX).getCanonicalPath();
+			this.path = this.root;
+			this.depth = this.root.split("/").length;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		console.startConsole(getConsolePrefix());			// Everything is ready! Print welcome text.
 	}
 
 	/**
@@ -45,11 +62,31 @@ public class Shell extends AbstractProcess {
 		console.setInCommand(true);				// Console inside command
 		Parser parser = new Parser(line);   	// Parses the line
 		commands = parser.getAllCommands();
-		this.input = new PipedInputStream(4194304);
-		redirectInput(parser.getInputFile());
-		callSubProcess();
-		redirectOutput(parser.getOutputFile(), getStringFromInput());
+		if(!builtinCommand(commands.get(0))) {	// No builtin command
+			this.input = new PipedInputStream(4194304);
+			redirectInput(parser.getInputFile());
+			callSubProcess();
+			redirectOutput(parser.getOutputFile(), getStringFromInput());
+		}
 		console.setInCommand(false);			// Console outside command
+	}
+
+	/**
+	 * Checks builtin commands. In case of builtin command no further execution is proceeded.
+	 *
+	 * @param command parsed commands
+	 * @return true/false
+	 */
+	private boolean builtinCommand(List<String> command) {
+		if(command.get(0).equals("cd")) {
+			if(command.size() == 1) cd("");
+			else cd(command.get(1));
+			return true;
+		} else if(command.get(0).equals("pwd")) {
+			pwd();
+			return true;
+		}
+		return false;
 	}
 
 	// TODO: UTF-8!
@@ -101,7 +138,6 @@ public class Shell extends AbstractProcess {
 					builder.append((char) c);
 					c = consoleInput.read();
 				}
-				if(c == '\n') console.printNewLine("");			// Print new line also on console
 				if (c == -1) {
 					output.close();								// Doesn't block parent shell!
 					return;
@@ -145,5 +181,85 @@ public class Shell extends AbstractProcess {
 			e.printStackTrace();
 		}
 		return builder.toString();							// Loaded string
+	}
+
+	/**
+	 * Gets absolute path from relative path according to current location.
+	 * Returns null in case of crossing borders of the virtual filesystem.
+	 *
+	 * @param path relative path
+	 * @return absolute path
+	 */
+	public String getPath(String path) {
+		try {
+			String file = new File(this.path + '/' + path).getCanonicalPath();
+			if(file.split("/").length < depth) return null;			// Checking borders
+			return file;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;			// Out of virtual filesystem.
+	}
+
+	/**
+	 * Sets current path.
+	 *
+	 * @param path current path
+	 */
+	public void setPath(String path) {
+		this.path = path;
+	}
+
+	// TODO: Pretty outputs
+
+	/**
+	 * Change directory command.
+	 * Prints current location.
+	 *
+	 * @param param path
+	 */
+	private void cd(String param) {
+		try {
+			if(param.equals("")) {								// Cd without params -> go to user folder
+				setPath(root);
+				console.printResults(getPath(""));
+				return;
+			}
+			String path = getPath(param);
+			if(path == null) {									// Trying to go out of filesystem
+				console.printResults(getPath(""));
+				return;
+			}
+			File folder = new File(path);
+			if(!folder.exists()) {
+				console.printResults("No such a file or directory!");
+			} else {
+				if(!folder.isDirectory()) {
+					console.printResults("Not a directory!");
+				} else {
+					setPath(folder.getCanonicalPath());
+					console.printResults(getPath(""));
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Prints current path.
+	 */
+	private void pwd() {
+		console.printResults(getPath(""));
+	}
+
+	/**
+	 * Get console prefix with Shell name, current location and current user.
+	 *
+	 * @return BBShell:location user$
+	 */
+	public String getConsolePrefix() {
+		String parts[] = path.split("/");
+		return "BBShell:" + parts[parts.length-1] + " root$ ";
 	}
 }
