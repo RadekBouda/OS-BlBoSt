@@ -64,7 +64,9 @@ public class Console extends JTextPane {
      * @param text Text to be printed on a new line.
      */
     public void printNewLine(String text){
-        this.setText(this.getText() + "\n" + text);
+        String currentText = this.getText();
+        if(currentText.charAt(currentText.length() - 1) != '\n') this.setText(this.getText() + "\n" + text);
+        else this.setText(this.getText() + text);
         setCaretPosition(getText().length());
     }
 
@@ -194,9 +196,9 @@ public class Console extends JTextPane {
         switch (e.getKeyCode()) {
             //Executing command
             case KeyEvent.VK_ENTER:
-                e.consume();
                 String command = getCommand();
                 if (command == null) {
+                    e.consume();
                     printNewLine(shell.getConsolePrefix());
                     return;
                 }
