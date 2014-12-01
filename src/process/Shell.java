@@ -100,7 +100,7 @@ public class Shell extends AbstractProcess {
 	private void redirectOutput(String output, String txt) {
 		if(output != null) {
 			try {
-				BufferedWriter bfw = new BufferedWriter(new FileWriter(new File(output)));
+				BufferedWriter bfw = new BufferedWriter(new FileWriter(new File(getPath(output))));
 				bfw.write(txt);
 				bfw.close();
 				console.printResults("");
@@ -193,7 +193,7 @@ public class Shell extends AbstractProcess {
 	 */
 	public String getPath(String path) {
 		try {
-			String file = new File(this.path + File.separatorChar + path).getCanonicalPath().replaceAll(";", "");
+			String file = new File(this.path + File.separatorChar + path).getCanonicalPath();
 			if(file.split(Run.getPathSeparatorForSplit()).length < depth) return null;			// Checking borders
 			return file;
 		} catch (IOException e) {
