@@ -17,12 +17,14 @@ public class Cat extends AbstractProcess {
      * Create new process.
      *
      * @param pid Process ID
+     * @param parentPid process id of parent
      * @param input PipedInputStream
      * @param commands List of commands
+     * @param shell parent shell
      * @param path Path to file
      */
-    public Cat(int pid, PipedInputStream input, List<List<String>> commands, Shell shell, String path) {
-        super(pid, input, commands, shell);
+    public Cat(int pid, int parentPid, PipedInputStream input, List<List<String>> commands, Shell shell, String path) {
+        super(pid, parentPid, input, commands, shell);
         this.path = shell.getPath(path);
     }
 

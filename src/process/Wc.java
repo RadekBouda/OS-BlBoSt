@@ -15,11 +15,13 @@ public class Wc extends AbstractProcess {
      * Create new process
      *
      * @param pid process ID
+     * @param parentPid process id of parent
      * @param input PipedInputStream
      * @param commands list with commands
+     * @param shell parent shell
      */
-    public Wc(int pid, PipedInputStream input, List<List<String>> commands, Shell shell) {
-        super(pid, input, commands, shell);
+    public Wc(int pid, int parentPid, PipedInputStream input, List<List<String>> commands, Shell shell) {
+        super(pid, parentPid, input, commands, shell);
     }
 
     /**

@@ -6,7 +6,6 @@ import javax.swing.*;
 import java.awt.*;
 
 // TODO: Default close operation = close Shell.
-// TODO: Killing the console thread.
 
 /**
  * Instances of this class represent concrete windows with Console.
@@ -16,8 +15,8 @@ import java.awt.*;
 public class ConsoleWindow extends javax.swing.JFrame {
 
     private static final long serialVersionUID = 1L;
+    /** Own console */
     public Console console;
-    private javax.swing.JScrollPane jScrollPane1;
 
 
     /**
@@ -33,15 +32,10 @@ public class ConsoleWindow extends javax.swing.JFrame {
      * Initialization of components.
      */
     private void initComponents(Shell shell) {
-
-        jScrollPane1 = new javax.swing.JScrollPane();
         console = new Console(shell);
-        Thread consoleThread = new Thread(console);
-        consoleThread.run();
 
         this.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
-
 
         this.setTitle("OS Simulator - BlBoSt Team");
         this.setSize(600,500);
@@ -50,7 +44,10 @@ public class ConsoleWindow extends javax.swing.JFrame {
         JScrollPane jsp = new JScrollPane(console);
 
         this.add(jsp, BorderLayout.CENTER);
+    }
 
+    public void closeConsole() {
+        this.dispose();
     }
 
 }

@@ -9,14 +9,16 @@ import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.io.PipedOutputStream;
 
-// TODO: Singnals (CTRL+C etc.)
+// TODO: Signals (CTRL+C etc.)
+// TODO: Mouse listener. Clicking moves caret.
+// TODO: After stdin caret stays with command. Should be on next line.
 
 /**
  * Console - the part of ConsoleWindow where text and IO appears.
  *
  * Created by Radek Bouda, David Steinberger on 9. 11. 2014.
  */
-public class Console extends JTextPane implements Runnable {
+public class Console extends JTextPane {
     /** Own shell reference */
     private final Shell shell;
     /** Commands history */
@@ -116,22 +118,16 @@ public class Console extends JTextPane implements Runnable {
      */
     private boolean isCaretWhereItShouldBe() {
         String split[] = getText().split("\n");
-        int lastRowLength = split[split.length-1].length();
+        int lastRowLength = split[split.length - 1].length();
         int totalLength = getText().length();
 
-        if(getCaretPosition() < totalLength - lastRowLength + shell.getConsolePrefix().length()){
+        if (getCaretPosition() < totalLength - lastRowLength + shell.getConsolePrefix().length()) {
             return false;
         }
 
         return true;
 
     }
-
-    /**
-     * Empty run... Just listening keyboard.
-     */
-    @Override
-    public void run() {}
 
     /**
      * Private adapter which describes how to manipulate with keys, when they are pressed.

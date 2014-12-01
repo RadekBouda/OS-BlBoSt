@@ -11,10 +11,7 @@ import java.io.File;
 import java.io.PipedInputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Instance of this class represents the kernel of an operating system.
@@ -30,13 +27,15 @@ public class Kernel {
 	private int PID;
 	/** Table of processes */
 	private final Map<Integer, AbstractProcess> processes;
+	/** Pid of main shell */
+	public static final int MAIN_SHELL_PID = 1;
 
 	/**
 	 * Private constructor for singleton.
 	 */
 	private Kernel() {
 		processes = new HashMap<Integer, AbstractProcess>();
-		PID = 0;
+		PID = MAIN_SHELL_PID;							// First is created main shell
 		checkFolders();
 	}
 
@@ -54,7 +53,7 @@ public class Kernel {
 	}
 
 	/**
-	 * Checks if the filesystem exists, otherwise creates a new one.
+	 * Checks if the virtual filesystem exists, otherwise creates a new one.
 	 */
 	private void checkFolders() {
 		File mainDir = new File("filesystem");
@@ -65,7 +64,7 @@ public class Kernel {
 	 * Runs main shell.
 	 */
 	public void runShell() {
-		AbstractProcess shell = new Shell(PID, null, new ArrayList<List<String>>(), null);
+		AbstractProcess shell = new Shell(PID, 0, null, new ArrayList<List<String>>(), null);
 		increasePID();
 		processes.put(shell.getPid(), shell);
 		shell.start();
@@ -91,13 +90,14 @@ public class Kernel {
 			Class myClass = Class.forName(PACKAGE + "." + process);		// Finds the class
 			Class[] types = new Class[arguments.length];				// Types of arguments
 			types[0] = int.class;										// First always pid
-			types[1] = PipedInputStream.class;							// Second always input stream
-			types[2] = List.class;										// Third always List with rest of commands
-			types[3] = Shell.class;
-			for(int i = 4; i < arguments.length; i++) types[i] = arguments[i].getClass();	// Fills optional arguments
-			Constructor constructor = myClass.getConstructor(types);				// Gets constructor with given types.
+			types[1] = int.class;										// Second always father pid
+			types[2] = PipedInputStream.class;							// Third always input stream
+			types[3] = List.class;										// Fourth always List with rest of commands
+			types[4] = Shell.class;										// Fifth always shell
+			for(int i = 5; i < arguments.length; i++) types[i] = arguments[i].getClass();	// Fills optional arguments
+			Constructor constructor = myClass.getConstructor(types);						// Gets constructor with given types.
 
-			arguments[0] = PID;			// Sets the pid
+			arguments[0] = PID;											// Sets the pid
 			Object instance = constructor.newInstance(arguments);		// Initializes the object
 			AbstractProcess proc = (AbstractProcess) instance;			// Retypes to AbstractProcess
 			increasePID();												// Increases pid
@@ -122,6 +122,22 @@ public class Kernel {
 	public int killProcess(int pid) {
 		if(!processes.containsKey(pid)) return 1;
 		return 0;
+	}
+
+	/**
+	 * Kills main shell. Father of all processes.
+	 */
+	public void shutdown() {
+		killProcess(MAIN_SHELL_PID);
+	}
+
+	/**
+	 * Get processes records.
+	 *
+	 * @return all processes records
+	 */
+	public Set<Map.Entry<Integer, AbstractProcess>> getProcesses() {
+		return processes.entrySet();
 	}
 
 	/**

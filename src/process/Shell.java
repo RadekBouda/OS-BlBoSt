@@ -3,6 +3,7 @@ package process;
 import console.Console;
 import console.ConsoleWindow;
 import helpers.Parser;
+import kernel.Kernel;
 import kernel.Run;
 
 import java.io.*;
@@ -26,6 +27,8 @@ public class Shell extends AbstractProcess {
 	private String path;
 	/** Root path */
 	private String root;
+	/** Is running or hit the exit command */
+	private boolean running = false;
 
 	/** Virtual filesystem location */
 	private static final String PATH_PREFIX = "filesystem" + File.separatorChar;
@@ -34,12 +37,15 @@ public class Shell extends AbstractProcess {
 	 * Create new shell with own window.
 	 *
 	 * @param pid process ID
+	 * @param parentPid process id of parent
 	 * @param input PipedInputStream
-	 * @param commands list of commands
+	 * @param commands list of commands,
+	 * @param shell parent shell
 	 */
-	public Shell (int pid, PipedInputStream input, List<List<String>> commands, Shell shell){
-		super(pid, input, commands, shell);
-		if(pid == 0) this.shell = this;
+	public Shell (int pid, int parentPid, PipedInputStream input, List<List<String>> commands, Shell shell){
+		super(pid, parentPid, input, commands, shell);
+		this.shell = this;									// Shell to be forwarded
+		this.running = true;
 		this.consoleWindow = new ConsoleWindow(this);
 		this.console = consoleWindow.console;
 		try {
@@ -61,7 +67,7 @@ public class Shell extends AbstractProcess {
 		Parser parser = new Parser(line);   	// Parses the line
 		commands = parser.getAllCommands();
 		if(!builtinCommand(commands.get(0))) {	// No builtin command
-			this.input = new PipedInputStream(4194304);
+			this.input = new PipedInputStream(PIPE_BUFFER_SIZE);
 			redirectInput(parser.getInputFile());
 			callSubProcess();
 			redirectOutput(parser.getOutputFile(), getStringFromInput());
@@ -82,6 +88,9 @@ public class Shell extends AbstractProcess {
 			return true;
 		} else if(command.get(0).equals("pwd")) {
 			pwd();
+			return true;
+		} else if(command.get(0).equals("exit")) {
+			exit();
 			return true;
 		}
 		return false;
@@ -128,16 +137,16 @@ public class Shell extends AbstractProcess {
 	@Override
 	protected void processRun() {
 		try {
-			if(getPid() != 0) output.close(); // Doesn't block parent shell!
+			if(getPid() != Kernel.MAIN_SHELL_PID) output.close(); 	// Doesn't block parent shell!
 			int c;
-			while(true) {										// Infinite loop
+			while(running) {										// Infinite loop
 				StringBuilder builder = new StringBuilder();
 				c = consoleInput.read();
-				while (c != -1 && c != '\n') {					// End of pipe or end of line
+				while (c != -1 && c != '\n') {						// End of pipe or end of line
 					builder.append((char) c);
 					c = consoleInput.read();
 				}
-				executeCommand(builder.toString());				// Executes parsed commands
+				executeCommand(builder.toString());					// Executes parsed commands
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -189,7 +198,7 @@ public class Shell extends AbstractProcess {
 		try {
 			String fileName = path.length() > 0 && path.charAt(0) == File.separatorChar ? this.root + File.separatorChar + path:this.path + File.separatorChar + path; // Absolute or relative path
 			String file = new File(fileName).getCanonicalPath();
-			if(!file.matches("^" + root + ".*")) return null;			// Checking borders
+			if(!file.matches("^" + root.replaceAll("\\\\", "\\\\\\\\") + ".*")) return null;			// Checking borders
 			return file;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -248,6 +257,16 @@ public class Shell extends AbstractProcess {
 	 */
 	private void pwd() {
 		console.printResults(getPath(""));
+	}
+
+	/**
+	 * Exit current shell. If the main shell, call shutdown.
+	 */
+	private void exit() {
+		running = false;
+		consoleWindow.closeConsole();
+		Kernel.getInstance().killProcess(getPid());
+		if(getPid() == Kernel.MAIN_SHELL_PID) Kernel.getInstance().shutdown();
 	}
 
 	/**

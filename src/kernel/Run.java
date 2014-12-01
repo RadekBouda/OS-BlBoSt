@@ -13,7 +13,7 @@ import java.io.File;
  * @author Jan Blaha
  */
 public class Run {
-
+    /** Platform independent file separator */
     private static String PATH_SEPARATOR = "/";
 
     /**
@@ -23,9 +23,9 @@ public class Run {
     public static void main(String[] args) {
 
         if(File.separatorChar != '/'){
-            PATH_SEPARATOR = "\\\\";
+            PATH_SEPARATOR = "\\\\";        // Windows
         } else {
-            PATH_SEPARATOR = "/";
+            PATH_SEPARATOR = "/";           // Unix-like
         }
 
         Kernel.getInstance().runShell();
