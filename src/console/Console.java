@@ -148,6 +148,9 @@ public class Console extends JTextPane {
                     if (getText().toCharArray()[getCaretPosition() - 1] == ' ' && getText().toCharArray()[getCaretPosition() - 2] == '$') {
                         e.consume();
                     }
+                    if(getText().toCharArray()[getCaretPosition() - 1] == '\n'){
+                        e.consume();
+                    }
                     return;
                 }
             // Check console state
