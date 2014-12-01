@@ -66,9 +66,9 @@ public class Kernel {
 	 */
 	public void runShell() {
 		AbstractProcess shell = new Shell(PID, null, new ArrayList<List<String>>(), null);
-		processes.put(shell.getPid(), shell);
-		shell.run();
 		increasePID();
+		processes.put(shell.getPid(), shell);
+		shell.start();
 	}
 
 	/**

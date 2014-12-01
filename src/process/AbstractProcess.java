@@ -125,7 +125,7 @@ public abstract class AbstractProcess extends Thread {
 
 		process.setParentPid(pid);							// Set parent pid
 		addChildPid(process.getPid());
-		process.run();										// Launch process
+		process.start();										// Launch process
 	}
 
 	/**

@@ -26,8 +26,6 @@ public class Shell extends AbstractProcess {
 	private String path;
 	/** Root path */
 	private String root;
-	/** Minimal depth - used for validation of virtual filesystem path location */
-	private int depth;
 
 	/** Virtual filesystem location */
 	private static final String PATH_PREFIX = "filesystem" + File.separatorChar;
@@ -47,7 +45,6 @@ public class Shell extends AbstractProcess {
 		try {
 			this.root = new File(PATH_PREFIX).getCanonicalPath();
 			this.path = this.root;
-			this.depth = this.root.split(Run.getPathSeparatorForSplit()).length;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -131,6 +128,7 @@ public class Shell extends AbstractProcess {
 	@Override
 	protected void processRun() {
 		try {
+			if(getPid() != 0) output.close(); // Doesn't block parent shell!
 			int c;
 			while(true) {										// Infinite loop
 				StringBuilder builder = new StringBuilder();
@@ -138,10 +136,6 @@ public class Shell extends AbstractProcess {
 				while (c != -1 && c != '\n') {					// End of pipe or end of line
 					builder.append((char) c);
 					c = consoleInput.read();
-				}
-				if (c == -1) {
-					output.close();								// Doesn't block parent shell!
-					return;
 				}
 				executeCommand(builder.toString());				// Executes parsed commands
 			}
@@ -185,16 +179,17 @@ public class Shell extends AbstractProcess {
 	}
 
 	/**
-	 * Gets absolute path from relative path according to current location.
+	 * Gets absolute path of real filesystem from virtual filesystem path. Supports relative as well as absolute path.
 	 * Returns null in case of crossing borders of the virtual filesystem.
 	 *
-	 * @param path relative path
-	 * @return absolute path
+	 * @param path virtual path
+	 * @return real path
 	 */
 	public String getPath(String path) {
 		try {
-			String file = new File(this.path + File.separatorChar + path).getCanonicalPath();
-			if(file.split(Run.getPathSeparatorForSplit()).length < depth) return null;			// Checking borders
+			String fileName = path.length() > 0 && path.charAt(0) == File.separatorChar ? this.root + File.separatorChar + path:this.path + File.separatorChar + path; // Absolute or relative path
+			String file = new File(fileName).getCanonicalPath();
+			if(!file.matches("^" + root + ".*")) return null;			// Checking borders
 			return file;
 		} catch (IOException e) {
 			e.printStackTrace();
