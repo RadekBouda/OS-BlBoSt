@@ -70,11 +70,11 @@ public class Ls extends AbstractProcess {
     public static String getMan(){
         return "------------------ LS PROCESS ------------------\n"+
                 "- prints a content of current directory\n"+
-                "- can be used with a relative path as a non-compulsory parameter\n\n"+
+                "- can be used with a relative or absolute path as a non-compulsory parameter\n\n"+
                 "Syntax: ls\n"+
                 "- prints content of current directory\n\n"+
-                "Syntax: ls <relative_path>\n"+
-                "- prints content of directory at selected relative path\n"+
+                "Syntax: ls <relative/absolute path>\n"+
+                "- prints content of directory at selected relative or absolute path\n"+
                 "------------------ MANUAL END ------------------";
     }
 }
