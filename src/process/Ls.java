@@ -50,11 +50,31 @@ public class Ls extends AbstractProcess {
     protected void processRun() {
         try {
             File directory = new File(shell.getPath(path));
+            if(!directory.exists()){
+                output.write(("LS Error: Directory "+path+ " does not exist.").getBytes());
+                output.close();
+                return;
+            }
             String files[] = directory.list();
             for(String file : files) output.write((file + "\t").getBytes());
             output.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Returns a manual page of a process.
+     * @return Manual page
+     */
+    public static String getMan(){
+        return "------------------ LS PROCESS ------------------\n"+
+                "- prints a content of current directory\n"+
+                "- can be used with a relative path as a non-compulsory parameter\n\n"+
+                "Syntax: ls\n"+
+                "- prints content of current directory\n\n"+
+                "Syntax: ls <relative_path>\n"+
+                "- prints content of directory at selected relative path\n"+
+                "------------------ MANUAL END ------------------";
     }
 }
