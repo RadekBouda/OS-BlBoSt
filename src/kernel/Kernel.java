@@ -118,9 +118,24 @@ public class Kernel {
 		return null;
 	}
 
-	// TODO: Killing
 	public int killProcess(int pid) {
 		if(!processes.containsKey(pid)) return 1;
+                
+                AbstractProcess toKill = processes.get(pid);
+                List<Integer> childsToKill = toKill.getChildPids();
+                
+                for (int i = 0; i < childsToKill.size(); i++) {
+			this.killProcess(childsToKill.get(i));
+		}
+		
+		// remove all children from the child list
+		while (!childsToKill.isEmpty()) {
+			childsToKill.remove(0);
+		}
+		
+		// delete original process
+		removeReference(toKill.getPid());
+		toKill.delete();
 		return 0;
 	}
 

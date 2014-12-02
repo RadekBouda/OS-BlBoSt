@@ -158,6 +158,10 @@ public abstract class AbstractProcess extends Thread {
 			return null;
 		}
 	}
+        
+        public void delete(){
+            this.interrupt();
+        }
 
 	/**
 	 * Checks if the process has piped input.
