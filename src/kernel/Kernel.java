@@ -118,13 +118,19 @@ public class Kernel {
 		return null;
 	}
 
-	public int killProcess(int pid) {
-		if(!processes.containsKey(pid)) return 1;
-                
-                AbstractProcess toKill = processes.get(pid);
-                List<Integer> childsToKill = toKill.getChildPids();
-                
-                for (int i = 0; i < childsToKill.size(); i++) {
+	/**
+	 * Kills process with given pid. Also kills its children.
+	 * In case of no pid in process table, returns false.
+	 *
+	 * @param pid process id
+	 * @return true/false
+	 */
+	public boolean killProcess(int pid) {
+		if(!processes.containsKey(pid)) return false;
+        AbstractProcess toKill = processes.get(pid);
+
+		List<Integer> childsToKill = toKill.getChildPids();
+		for (int i = 0; i < childsToKill.size(); i++) {
 			this.killProcess(childsToKill.get(i));
 		}
 		
@@ -135,8 +141,8 @@ public class Kernel {
 		
 		// delete original process
 		removeReference(toKill.getPid());
-		toKill.delete();
-		return 0;
+		toKill.kill();
+		return true;
 	}
 
 	/**

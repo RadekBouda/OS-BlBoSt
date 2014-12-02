@@ -124,7 +124,7 @@ public abstract class AbstractProcess extends Thread {
 		}
 		AbstractProcess process = Kernel.getInstance().newProcess(commands.get(position).get(0), args);	// Get process from kernel
 
-		if(process == null){
+		if(process == null) {
 			return;
 		}
 
@@ -158,10 +158,13 @@ public abstract class AbstractProcess extends Thread {
 			return null;
 		}
 	}
-        
-        public void delete(){
-            this.interrupt();
-        }
+
+	/**
+	 * Interrupts process.
+	 */
+	public void kill() {
+		this.interrupt();
+	}
 
 	/**
 	 * Checks if the process has piped input.

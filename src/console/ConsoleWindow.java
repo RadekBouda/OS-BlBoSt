@@ -4,6 +4,8 @@ import process.Shell;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 // TODO: Default close operation = close Shell.
 
@@ -31,10 +33,10 @@ public class ConsoleWindow extends javax.swing.JFrame {
     /**
      * Initialization of components.
      */
-    private void initComponents(Shell shell) {
+    private void initComponents(final Shell shell) {
         console = new Console(shell);
 
-        this.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         this.setLocationRelativeTo(null);
 
         this.setTitle("OS Simulator - BlBoSt Team");
@@ -44,10 +46,25 @@ public class ConsoleWindow extends javax.swing.JFrame {
         JScrollPane jsp = new JScrollPane(console);
 
         this.add(jsp, BorderLayout.CENTER);
+
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                shell.exit();
+            }
+        });
     }
 
     public void closeConsole() {
-        this.dispose();
+        this.setVisible(false);
+        final JFrame that = this;
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                that.dispose();
+            }
+        });
+        t.start();
     }
 
 }

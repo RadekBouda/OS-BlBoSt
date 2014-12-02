@@ -10,8 +10,6 @@ import java.io.IOException;
 import java.io.PipedOutputStream;
 
 // TODO: Signals (CTRL+C etc.)
-// TODO: Mouse listener. Clicking moves caret.
-// TODO: After stdin caret stays with command. Should be on next line.
 
 /**
  * Console - the part of ConsoleWindow where text and IO appears.
@@ -65,8 +63,8 @@ public class Console extends JTextPane {
      */
     public void printNewLine(String text){
         String currentText = this.getText();
-        if(currentText.charAt(currentText.length() - 1) != '\n') this.setText(this.getText() + "\n" + text);
-        else this.setText(this.getText() + text);
+        if(currentText.charAt(currentText.length() - 1) != '\n') this.setText(currentText + "\n" + text);
+        else this.setText(currentText + text);
         setCaretPosition(getText().length());
     }
 

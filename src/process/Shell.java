@@ -70,7 +70,9 @@ public class Shell extends AbstractProcess {
 			this.input = new PipedInputStream(PIPE_BUFFER_SIZE);
 			redirectInput(parser.getInputFile());
 			callSubProcess();
-			redirectOutput(parser.getOutputFile(), getStringFromInput());
+			String output = getStringFromInput();
+			if(!running) return;				// Self killing check
+			redirectOutput(parser.getOutputFile(), output);
 		}
 		console.setInCommand(false);			// Console outside command
 	}
@@ -149,7 +151,7 @@ public class Shell extends AbstractProcess {
 				executeCommand(builder.toString());					// Executes parsed commands
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			return;
 		}
 	}
 
@@ -182,7 +184,7 @@ public class Shell extends AbstractProcess {
 			}
 			if(c == 0) return null;							// Finishes stdin
 		} catch (IOException e) {
-			e.printStackTrace();
+			return null;									// Child is killed
 		}
 		return builder.toString();							// Loaded string
 	}
@@ -253,6 +255,15 @@ public class Shell extends AbstractProcess {
 	}
 
 	/**
+	 * Clean before killing.
+	 */
+	public void kill() {
+		running = false;
+		consoleWindow.closeConsole();
+		this.interrupt();
+	}
+
+	/**
 	 * Prints current path.
 	 */
 	private void pwd() {
@@ -262,9 +273,7 @@ public class Shell extends AbstractProcess {
 	/**
 	 * Exit current shell. If the main shell, call shutdown.
 	 */
-	private void exit() {
-		running = false;
-		consoleWindow.closeConsole();
+	public void exit() {
 		Kernel.getInstance().killProcess(getPid());
 		if(getPid() == Kernel.MAIN_SHELL_PID) Kernel.getInstance().shutdown();
 	}

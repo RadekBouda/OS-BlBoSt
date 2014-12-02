@@ -1,10 +1,10 @@
 package process;
 
+import kernel.Kernel;
+
+import java.io.IOException;
 import java.io.PipedInputStream;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import kernel.Kernel;
 
 /**
  *
@@ -25,7 +25,7 @@ public class Kill extends AbstractProcess {
      */
     public Kill(int pid, int parentPid, PipedInputStream input, List<List<String>> commands, Shell shell, String pidToKill) {
         super(pid, parentPid, input, commands, shell);
-        this.pidToKill = commands.get(0).get(1);
+        this.pidToKill = pidToKill;
     }
 
     /**
@@ -33,14 +33,23 @@ public class Kill extends AbstractProcess {
      */
     @Override
     protected void processRun() {
-        Set<Map.Entry<Integer, AbstractProcess>> processes = Kernel.getInstance().getProcesses();
-        for (Map.Entry<Integer, AbstractProcess> process : processes) {
-            if (Integer.parseInt(pidToKill) == process.getKey()) {
-                Kernel.getInstance().killProcess(process.getKey());
-                if (process.getKey() == Kernel.MAIN_SHELL_PID) {
-                    Kernel.getInstance().shutdown();
+        try {
+            int pid;
+            try {
+                pid = Integer.valueOf(pidToKill);
+                if(pid == Kernel.MAIN_SHELL_PID) {
+                    Kernel.getInstance().killProcess(pid);
+                    output.close();
+                } else {
+                    output.write((Kernel.getInstance().killProcess(pid) ? "Process successfully killed" : "No pid " + pidToKill + " found!").getBytes());
+                    output.close();
                 }
+            } catch (NumberFormatException e) {
+                output.write("Wrong format of pid!".getBytes());
+                output.close();
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
