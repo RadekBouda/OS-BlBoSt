@@ -12,7 +12,7 @@ import kernel.Kernel;
  */
 public class Kill extends AbstractProcess {
 
-    int pidToKill;
+    String pidToKill;
 
     /**
      * Create new kill process.
@@ -23,9 +23,9 @@ public class Kill extends AbstractProcess {
      * @param commands list of commands
      * @param shell parent shell
      */
-    public Kill(int pid, int parentPid, PipedInputStream input, List<List<String>> commands, Shell shell, int pidToKill) {
+    public Kill(int pid, int parentPid, PipedInputStream input, List<List<String>> commands, Shell shell, String pidToKill) {
         super(pid, parentPid, input, commands, shell);
-        this.pidToKill = Integer.parseInt(commands.get(0).get(1));
+        this.pidToKill = commands.get(0).get(1);
     }
 
     /**
@@ -35,7 +35,7 @@ public class Kill extends AbstractProcess {
     protected void processRun() {
         Set<Map.Entry<Integer, AbstractProcess>> processes = Kernel.getInstance().getProcesses();
         for (Map.Entry<Integer, AbstractProcess> process : processes) {
-            if (pidToKill == process.getKey()) {
+            if (Integer.parseInt(pidToKill) == process.getKey()) {
                 Kernel.getInstance().killProcess(process.getKey());
                 if (process.getKey() == Kernel.MAIN_SHELL_PID) {
                     Kernel.getInstance().shutdown();
