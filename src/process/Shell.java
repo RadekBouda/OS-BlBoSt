@@ -19,9 +19,9 @@ import java.util.List;
 public class Shell extends AbstractProcess {
 
 	/** Console window */
-	private final ConsoleWindow consoleWindow;
+	private ConsoleWindow consoleWindow;
 	/** Console */
-	private final Console console;
+	private Console console;
 	/** Console input pipe */
 	private PipedInputStream consoleInput;
 	/** Current path */
@@ -29,7 +29,9 @@ public class Shell extends AbstractProcess {
 	/** Root path */
 	private String root;
 	/** Is running or hit the exit command */
-	private boolean running = false;
+	private boolean running;
+	/** Basic process or whole console */
+	private boolean process;
 
 	/** Virtual filesystem location */
 	private static final String PATH_PREFIX = "filesystem" + File.separatorChar;
@@ -45,17 +47,63 @@ public class Shell extends AbstractProcess {
 	 */
 	public Shell (int pid, int parentPid, PipedInputStream input, List<List<String>> commands, Shell shell){
 		super(pid, parentPid, input, commands, shell);
-		this.shell = this;									// Shell to be forwarded
-		this.running = true;
-		this.consoleWindow = new ConsoleWindow(this);
-		this.console = consoleWindow.console;
 		try {
+			this.shell = this;                                    	// Shell to be forwarded
+			this.running = true;
 			this.root = new File(PATH_PREFIX).getCanonicalPath();
 			this.path = this.root;
+			if (commands.size() > 0) processInit();					// Normal process
+			else consoleInit();										// Console
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		console.startConsole(getConsolePrefix());			// Everything is ready! Print welcome text.
+	}
+
+	/**
+	 * Initialization for basic process. Blocking parent shell.
+	 */
+	private void processInit() {
+		this.consoleInput = (PipedInputStream) this.input;			// Read commands from previous process
+		this.process = true;										// Set process flag
+	}
+
+	/**
+	 * Console process initialization.
+	 *
+	 * @throws IOException
+	 */
+	private void consoleInit() throws IOException {
+		if (this.output != null) this.output.close();        	// Doesn't block parent shell!
+		this.output = new ByteArrayOutputStream();				// Output for shell errors.
+		this.consoleWindow = new ConsoleWindow(this);
+		this.console = consoleWindow.console;
+		console.startConsole(getConsolePrefix());       	    // Everything is ready! Print welcome text.
+		this.process = false;
+	}
+
+	/**
+	 * Own job. Doesn't block previous shell!
+	 */
+	@Override
+	protected void processRun() {
+		try {
+			int c;
+			while(running) {										// Loop until running
+				StringBuilder builder = new StringBuilder();
+				c = consoleInput.read();
+				while (c != -1 && c != '\n') {						// End of pipe or end of line
+					builder.append((char) c);
+					c = consoleInput.read();
+				}
+				executeCommand(builder.toString());					// Executes parsed commands
+				if(c == -1) {										// In case of process
+					output.close();									// Stop blocking parent shell
+					return;
+				}
+			}
+		} catch (IOException e) {
+			return;
+		}
 	}
 
 	/**
@@ -64,18 +112,35 @@ public class Shell extends AbstractProcess {
 	 * @param line command
 	 */
 	public void executeCommand(String line) {
-		console.setInCommand(true);				// Console inside command
-		Parser parser = new Parser(line);   	// Parses the line
+		if(!process) console.setInCommand(true);							// Console inside command
+		Parser parser = new Parser(line);   								// Parses the line
 		commands = parser.getAllCommands();
-		if(!builtinCommand(commands.get(0))) {	// No builtin command
+		if(!builtinCommand(commands.get(0))) {								// No builtin command
 			this.input = new PipedInputStream(PIPE_BUFFER_SIZE);
 			redirectInput(parser.getInputFile());
 			callSubProcess();
 			String output = getStringFromInput();
-			if(!running) return;				// Self killing check
+			if(!running) return;											// Self killing check
+			if(output == null) output = readOwnOutput();					// Problem with first command
 			redirectOutput(parser.getOutputFile(), output);
 		}
-		console.setInCommand(false);			// Console outside command
+		if(!process) console.setInCommand(false);							// Console outside command
+	}
+
+	/**
+	 * Gets output string from own stream in case of fail in the first command.
+	 *
+	 * @return output
+	 */
+	private String readOwnOutput() {
+		try {
+			String text = ((ByteArrayOutputStream) output).toString("UTF-8");
+			((ByteArrayOutputStream) output).reset();							// Clear output for next commands.
+			return text;
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	/**
@@ -107,16 +172,19 @@ public class Shell extends AbstractProcess {
 	 * @param txt content
 	 */
 	private void redirectOutput(String output, String txt) {
-		if(output != null) {
-			try {
+		try {
+			if (output != null) {											// Output to file
 				BufferedWriter bfw = new BufferedWriter(new FileWriter(new File(getPath(output))));
 				bfw.write(txt);
 				bfw.close();
-				console.printResults("");
-			} catch (IOException e) {
-				e.printStackTrace();
+				if (!process) console.printResults("");						// Print new line in console.
+			} else {
+				if (!process) console.printResults(txt);					// Print to console
+				else this.output.write((txt + "\n").getBytes());			// Output to parent shell.
 			}
-		} else console.printResults(txt);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -132,28 +200,6 @@ public class Shell extends AbstractProcess {
 		cat.add("cat");
 		cat.add(input);
 		commands.add(0, cat);							// Adds to first position in commands
-	}
-
-	/**
-	 * Own job. Doesn't block previous shell!
-	 */
-	@Override
-	protected void processRun() {
-		try {
-			if(getPid() != Kernel.MAIN_SHELL_PID) output.close(); 	// Doesn't block parent shell!
-			int c;
-			while(running) {										// Infinite loop
-				StringBuilder builder = new StringBuilder();
-				c = consoleInput.read();
-				while (c != -1 && c != '\n') {						// End of pipe or end of line
-					builder.append((char) c);
-					c = consoleInput.read();
-				}
-				executeCommand(builder.toString());					// Executes parsed commands
-			}
-		} catch (IOException e) {
-			return;
-		}
 	}
 
 	/**

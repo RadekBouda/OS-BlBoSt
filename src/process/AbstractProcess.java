@@ -125,6 +125,12 @@ public abstract class AbstractProcess extends Thread {
 		AbstractProcess process = Kernel.getInstance().newProcess(commands.get(position).get(0), args);	// Get process from kernel
 
 		if(process == null) {
+			try {
+				output.write((commands.get(position).get(0) + " is not a valid process!\n").getBytes());	// Send error to pipe
+				output.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			return;
 		}
 
