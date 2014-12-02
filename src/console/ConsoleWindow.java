@@ -7,8 +7,6 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-// TODO: Default close operation = close Shell.
-
 /**
  * Instances of this class represent concrete windows with Console.
  * @author Jan Blaha, Radek Bouda, David Steinberger
