@@ -52,4 +52,16 @@ public class Kill extends AbstractProcess {
             e.printStackTrace();
         }
     }
+    
+    /**
+     * Returns a manual page of a process.
+     * @return Manual page
+     */
+    public static String getMan(){
+    return "------------------ KILL PROCESS ------------------\n"+
+            "- terminate a process\n\n"+
+            "Syntax: kill <pid>\n"+
+            "- kills running process with given pid\n\n"+
+            "------------------ MANUAL END ------------------";
+    }
 }

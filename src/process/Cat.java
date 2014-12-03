@@ -49,4 +49,19 @@ public class Cat extends AbstractProcess {
             e.printStackTrace();
         }
     }
+    
+    /**
+     * Returns a manual page of a process.
+     * @return Manual page
+     */
+    public static String getMan(){
+    return "------------------ CAT PROCESS ------------------\n"+
+            "- concatenate files and print on the standard output\n"+
+            "- can be used with a relative or absolute path as a non-compulsory parameter\n\n"+
+            "Syntax: cat <file>\n"+
+            "- prints file in current directory (if the file exists)\n\n"+
+            "Syntax: cat <relative/absolute path><file>\n"+
+            "- prints file in directory at selected relative or absolute path (if the file exists)\n"+
+            "------------------ MANUAL END ------------------";
+    }
 }

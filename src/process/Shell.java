@@ -334,4 +334,12 @@ public class Shell extends AbstractProcess {
 		String parts[] = path.split(Run.getPathSeparatorForSplit());
 		return "BBShell:" + parts[parts.length-1] + " root$ ";
 	}
+        
+        /**
+         * Returns a manual page of a process.
+         * @return Manual page
+         */
+            public static String getMan(){
+                return "No manual entry for Shell.\n";
+    }
 }

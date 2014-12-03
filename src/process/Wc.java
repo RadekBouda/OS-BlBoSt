@@ -62,4 +62,16 @@ public class Wc extends AbstractProcess {
             e.printStackTrace();
         }
     }
+    
+   /**
+    * Returns a manual page of a process.
+    * @return Manual page
+    */
+    public static String getMan(){
+    return "------------------ WC PROCESS ------------------\n"+
+            "- print the number of newlines in files\n\n"+
+            "Syntax: wc <file>\n"+
+            "- prints  the number of lines in file in directory at selected relative or absolute path (if the file exists)\n"+
+            "------------------ MANUAL END ------------------";
+    }
 }

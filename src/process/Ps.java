@@ -64,4 +64,16 @@ public class Ps extends AbstractProcess {
     private String getHeaders() {
         return "PID\tParent Pid\tStart time\tProcess name\n";
     }
+    
+    /**
+     * Returns a manual page of a process.
+     * @return Manual page
+     */
+    public static String getMan(){
+    return "------------------ PS PROCESS ------------------\n"+
+            "- report a snapshot of the current processes.\n\n"+
+            "Syntax: ps\n"+
+            "- gives report about currently running processes\n\n"+
+            "------------------ MANUAL END ------------------";
+    }
 }
