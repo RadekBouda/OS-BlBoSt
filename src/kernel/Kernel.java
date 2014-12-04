@@ -92,15 +92,15 @@ public class Kernel {
 	public int newProcess(String process, Object[] arguments) {
 		try {
 			process = process.substring(0, 1).toUpperCase() +  process.substring(1, process.length()).toLowerCase(); // Makes processes case insensitive!
-			Class myClass = Class.forName(PACKAGE + "." + process);		// Finds the class
-			Class[] types = new Class[arguments.length];				// Types of arguments
+			Class<?> myClass = Class.forName(PACKAGE + "." + process);		// Finds the class
+			Class<?>[] types = new Class[arguments.length];				// Types of arguments
 			types[0] = int.class;										// First always pid
 			types[1] = int.class;										// Second always father pid
 			types[2] = PipedInputStream.class;							// Third always input stream
 			types[3] = List.class;										// Fourth always List with rest of commands
 			types[4] = Shell.class;										// Fifth always shell
 			for(int i = 5; i < arguments.length; i++) types[i] = arguments[i].getClass();	// Fills optional arguments
-			Constructor constructor = myClass.getConstructor(types);						// Gets constructor with given types.
+			Constructor<?> constructor = myClass.getConstructor(types);						// Gets constructor with given types.
 
 			arguments[0] = PID;											// Sets the pid
 			Object instance = constructor.newInstance(arguments);		// Initializes the object
