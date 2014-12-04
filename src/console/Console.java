@@ -132,6 +132,16 @@ public class Console extends JTextPane {
     }
 
     /**
+     * Get last line from console.
+     *
+     * @return last line
+     */
+    public String getLastLine() {
+        String split[] = getText().split("\n");
+        return split[split.length-1];
+    }
+
+    /**
      * Private adapter which describes how to manipulate with keys, when they are pressed.
      * Special behavior for Return, Left, Right and BackSpace keys.
      * @author Radek Bouda, David Steinberger
@@ -175,8 +185,8 @@ public class Console extends JTextPane {
                 output.write(CONTROL_D_BYTE);                    // Byte 4 - CTRL + D signal
             } else if(e.isControlDown() && e.getKeyCode() == KeyEvent.VK_C) {
                 output.write(CONTROL_C_BYTE);                    // Byte 3 - CTRL + C signal
-            } else {
-                output.write(e.getKeyCode());
+            } else if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+                output.write((getLastLine() + "\n").getBytes());
             }
         } catch (IOException exc) {
             return;
