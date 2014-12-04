@@ -1,5 +1,6 @@
 package process;
 
+import console.Console;
 import kernel.Kernel;
 
 import java.io.*;
@@ -52,9 +53,7 @@ public abstract class AbstractProcess extends Thread {
 		this.input = new PipedInputStream(PIPE_BUFFER_SIZE);
 		try {
 			if(input != null) this.output = new PipedOutputStream(input);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		} catch (IOException e) {}
 	}
 
 	/**
@@ -140,7 +139,7 @@ public abstract class AbstractProcess extends Thread {
 				Kernel.getInstance().startProcess(processPid);		// Launch process
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			return;
 		}
 	}
 
@@ -172,7 +171,8 @@ public abstract class AbstractProcess extends Thread {
 		try {
 			int c;
 			StringBuilder builder = new StringBuilder();
-			while ((c = input.read()) != -1){
+			while ((c = input.read()) != -1) {
+				if(c == Console.CONTROL_C_BYTE) return null;
 				if(c != '\r'){ builder.append((char) c);}
 			}
 			return builder.toString();
@@ -185,7 +185,14 @@ public abstract class AbstractProcess extends Thread {
 	 * Interrupts process.
 	 */
 	public void kill() {
-		this.interrupt();
+		try {
+			output.write(Console.CONTROL_C_BYTE);			// Interrupted flag. Don't print output.
+			output.close();
+			this.interrupt();
+		} catch (IOException e) {
+			return;
+		}
+
 	}
 
 	/**

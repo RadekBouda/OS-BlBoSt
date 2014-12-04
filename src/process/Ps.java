@@ -42,7 +42,7 @@ public class Ps extends AbstractProcess {
             }
             output.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            return;
         }
     }
 

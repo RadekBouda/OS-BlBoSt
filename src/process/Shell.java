@@ -57,9 +57,7 @@ public class Shell extends AbstractProcess {
 			this.path = this.root;
 			if (commands.size() > 0) processInit();					// Normal process
 			else consoleInit();										// Console
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		} catch (IOException e) {}
 	}
 
 	/**
@@ -139,9 +137,8 @@ public class Shell extends AbstractProcess {
 			((ByteArrayOutputStream) output).reset();							// Clear output for next commands.
 			return text;
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			return null;
 		}
-		return null;
 	}
 
 	/**
@@ -218,7 +215,7 @@ public class Shell extends AbstractProcess {
 				else this.output.write((txt + "\n").getBytes());			// Output to parent shell.
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			return;
 		}
 	}
 
@@ -246,7 +243,7 @@ public class Shell extends AbstractProcess {
 		try {
 			consoleInput = new PipedInputStream(output);
 		} catch (IOException e) {
-			e.printStackTrace();
+			return;
 		}
 	}
 
@@ -255,16 +252,20 @@ public class Shell extends AbstractProcess {
 	 *
 	 * @return line
 	 */
-	public String getLine() {
+	public String getLine(int pid) {
 		int c;
 		StringBuilder builder = new StringBuilder();
 		try {
 			c = consoleInput.read();
-			while (c != -1 && c != '\n' && c != 0) {		// 0 - represents Control - D signal
+			while (c != -1 && c != '\n' && c != Console.CONTROL_C_BYTE && c != Console.CONTROL_D_BYTE) {		// 0 - represents Control - D signal
 				builder.append((char) c);
 				c = consoleInput.read();
 			}
-			if(c == 0) return null;							// Finishes stdin
+			if(c == Console.CONTROL_C_BYTE) {
+				Kernel.getInstance().killProcessAndParents(pid);
+				return null;
+			}
+			if(c == Console.CONTROL_D_BYTE) return null;							// Finishes stdin
 		} catch (IOException e) {
 			return null;									// Child is killed
 		}
@@ -321,7 +322,7 @@ public class Shell extends AbstractProcess {
 				}
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			return;
 		}
 	}
 

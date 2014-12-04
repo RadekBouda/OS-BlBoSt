@@ -61,7 +61,7 @@ public class Man extends AbstractProcess{
             output.close();
         } catch (IOException e) {
             // error during IO with console, can't be printed to the console because the problem is communicating with a console
-            e.printStackTrace();
+            return;
         } catch (ClassNotFoundException e) {
             //unknown command
             try {
@@ -69,7 +69,7 @@ public class Man extends AbstractProcess{
                 output.close();
             } catch (IOException ex) {
                 // error during IO with console, can't be printed to the console because the problem is communicating with a console
-                e.printStackTrace();
+                return;
             }
 
         } catch (NoSuchMethodException e) {
@@ -79,7 +79,7 @@ public class Man extends AbstractProcess{
                 output.close();
             } catch (IOException ex) {
                 // error during IO with console, can't be printed to the console because the problem is communicating with a console
-                e.printStackTrace();
+                return;
             }
         } catch (IllegalAccessException e) {
             e.printStackTrace(); // i don't know when this exception can occur

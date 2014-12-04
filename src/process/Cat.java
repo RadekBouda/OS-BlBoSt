@@ -43,10 +43,10 @@ public class Cat extends AbstractProcess {
                 shell.printError("cat: " + path + ": No such a file or directory");
                 output.close();
             } catch (IOException e1) {
-                e1.printStackTrace();
+                return;
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            return;
         }
     }
     

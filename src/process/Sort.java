@@ -56,7 +56,7 @@ public class Sort extends AbstractProcess {
             }
             output.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            return;
         }
     }
 
@@ -68,7 +68,7 @@ public class Sort extends AbstractProcess {
             ArrayList<String> lines = new ArrayList<String>();
             String currentLine = "";
 
-            while((currentLine = shell.getLine()) != null){
+            while((currentLine = shell.getLine(getPid())) != null){
                 lines.add(currentLine);
             }
 
@@ -80,10 +80,9 @@ public class Sort extends AbstractProcess {
                 output.write(line.getBytes());
                 output.write("\n".getBytes());
             }
-
             output.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            return;
         }
     }
 

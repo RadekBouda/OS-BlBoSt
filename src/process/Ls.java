@@ -59,7 +59,7 @@ public class Ls extends AbstractProcess {
             for(String file : files) output.write((file + "\t").getBytes());
             output.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            return;
         }
     }
 

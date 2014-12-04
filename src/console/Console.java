@@ -9,8 +9,6 @@ import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.io.PipedOutputStream;
 
-// TODO: Signals (CTRL+C etc.)
-
 /**
  * Console - the part of ConsoleWindow where text and IO appears.
  *
@@ -27,6 +25,10 @@ public class Console extends JTextPane {
     private boolean inCommand;
     /** This constant defines, how many lines are stored in memory. */
     private static final int LINES_CNT_TO_MEMORIZE = 115;
+
+    /** Control bytes */
+    public static final int CONTROL_D_BYTE = 4;
+    public static final int CONTROL_C_BYTE = 3;
 
     /**
      * Creates new console instance.
@@ -154,11 +156,8 @@ public class Console extends JTextPane {
                     return;
                 }
             // Check console state
-            if(!inCommand) {
-                outsideCommandBehaviour(e);
-            } else {
-                insideCommandBehaviour(e);
-            }
+            if(!inCommand) outsideCommandBehaviour(e);
+            else insideCommandBehaviour(e);
         }
     }
 
@@ -166,18 +165,21 @@ public class Console extends JTextPane {
      * Behaviour inside a command. Just copy stdin into pipe.
      *
      * Signals: Ctrl-D - stop listening
+     *          Ctrl-C - terminate
      *
      * @param e key event
      */
     private void insideCommandBehaviour(KeyEvent e) {
         try {
             if(e.isControlDown() && e.getKeyCode() == KeyEvent.VK_D) {
-                output.write(0);                    // Byte 0 - CTRL + D signal
+                output.write(CONTROL_D_BYTE);                    // Byte 4 - CTRL + D signal
+            } else if(e.isControlDown() && e.getKeyCode() == KeyEvent.VK_C) {
+                output.write(CONTROL_C_BYTE);                    // Byte 3 - CTRL + C signal
             } else {
                 output.write(e.getKeyCode());
             }
-        } catch (IOException e1) {
-            e1.printStackTrace();
+        } catch (IOException exc) {
+            return;
         }
     }
 

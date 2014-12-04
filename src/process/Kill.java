@@ -49,7 +49,7 @@ public class Kill extends AbstractProcess {
                 output.close();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            return;
         }
     }
     

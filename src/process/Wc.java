@@ -46,7 +46,7 @@ public class Wc extends AbstractProcess {
             else output.write((text.split("\n").length + "").getBytes());
             output.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            return;
         }
     }
 
@@ -56,11 +56,11 @@ public class Wc extends AbstractProcess {
     private void stdInput() {
         try {
             int count = 0;
-            while(shell.getLine() != null) count++;
+            while(shell.getLine(getPid()) != null) count++;
             output.write(("" + count).getBytes());
             output.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            return;
         }
     }
     

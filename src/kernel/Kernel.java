@@ -23,6 +23,8 @@ import java.util.*;
 public class Kernel {
 	/** Package with processes */
 	public static final String PACKAGE = "process";
+	/** Filesystem folder name */
+	public static final String FILESYSTEM_FOLDER = "filesystem";
 	/** PID counter */
 	private int PID;
 	/** Table of processes */
@@ -56,7 +58,7 @@ public class Kernel {
 	 * Checks if the virtual filesystem exists, otherwise creates a new one.
 	 */
 	private void checkFolders() {
-		File mainDir = new File("filesystem");
+		File mainDir = new File(FILESYSTEM_FOLDER);
 		if(!mainDir.exists()) mainDir.mkdir();
 	}
 
@@ -105,8 +107,8 @@ public class Kernel {
 			AbstractProcess proc = (AbstractProcess) instance;			// Retypes to AbstractProcess
 			increasePID();												// Increases pid
 			processes.put(proc.getPid(), proc);							// Adds to the process table
-			return proc.getPid();												// Returns the process
-		} catch (ClassNotFoundException e) {				// TODO: Wrong arguments etc.
+			return proc.getPid();										// Returns the process
+		} catch (ClassNotFoundException e) {
 			return -1;
 		} catch (InvocationTargetException e) {
 			e.printStackTrace();
@@ -180,5 +182,18 @@ public class Kernel {
 	 */
 	public void removeReference(int pid) {
 		if(processes.containsKey(pid)) processes.remove(pid);
+	}
+
+	/**
+	 * Kills parent processes. Used by terminate signal.
+	 *
+	 * @param pid current process id
+	 */
+	public void killProcessAndParents(int pid) {
+		AbstractProcess process = processes.get(pid);
+		while(!(process instanceof Shell)) {					// Doesn't kill shell
+			killProcess(process.getPid());
+			process = processes.get(process.getParentPid());
+		}
 	}
 }
