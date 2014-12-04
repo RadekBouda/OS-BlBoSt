@@ -35,6 +35,8 @@ public class Shell extends AbstractProcess {
 	private boolean running;
 	/** Basic process or whole console */
 	private boolean process;
+	/** PID of current running process */
+	private int runningProcess;
 
 	/** Virtual filesystem location */
 	private static final String PATH_PREFIX = "filesystem" + File.separatorChar;
@@ -75,7 +77,6 @@ public class Shell extends AbstractProcess {
 	 */
 	private void consoleInit() throws IOException {
 		if (this.output != null) this.output.close();        	// Doesn't block parent shell!
-		this.output = new ByteArrayOutputStream();				// Output for shell errors.
 		this.consoleWindow = new ConsoleWindow(this);
 		this.console = consoleWindow.console;
 		console.startConsole(getConsolePrefix());       	    // Everything is ready! Print welcome text.
@@ -118,27 +119,11 @@ public class Shell extends AbstractProcess {
 		commands = parser.getAllCommands();
 		this.input = new PipedInputStream(PIPE_BUFFER_SIZE);
 		redirectInput(parser.getInputFile());
-		callSubProcess();
+		runningProcess = callSubProcess();
 		String output = getStringFromInput();
-		if(!running) return;											// Self killing check
-		if(output == null) output = readOwnOutput();					// Problem with first command
+		if(!running) return;												// Self killing check
 		redirectOutput(parser.getOutputFile(), output);
 		if(!process) console.setInCommand(false);							// Console outside command
-	}
-
-	/**
-	 * Gets output string from own stream in case of fail in the first command.
-	 *
-	 * @return output
-	 */
-	private String readOwnOutput() {
-		try {
-			String text = ((ByteArrayOutputStream) output).toString("UTF-8");
-			((ByteArrayOutputStream) output).reset();							// Clear output for next commands.
-			return text;
-		} catch (UnsupportedEncodingException e) {
-			return null;
-		}
 	}
 
 	/**
@@ -204,6 +189,7 @@ public class Shell extends AbstractProcess {
 	 * @param txt content
 	 */
 	private void redirectOutput(String output, String txt) {
+		if(txt == null) txt = "";                                           // If output is null (error appears etc.), print just new line with shell prefix.
 		try {
 			if (output != null) {											// Output to file
 				BufferedWriter bfw = new BufferedWriter(new FileWriter(new File(getPath(output))));
@@ -252,18 +238,14 @@ public class Shell extends AbstractProcess {
 	 *
 	 * @return line
 	 */
-	public String getLine(int pid) {
+	public String getLine() {
 		int c;
 		StringBuilder builder = new StringBuilder();
 		try {
 			c = consoleInput.read();
-			while (c != -1 && c != '\n' && c != Console.CONTROL_C_BYTE && c != Console.CONTROL_D_BYTE) {		// 0 - represents Control - D signal
+			while (c != -1 && c != '\n' && c != Console.CONTROL_D_BYTE) {		// 0 - represents Control - D signal
 				builder.append((char) c);
 				c = consoleInput.read();
-			}
-			if(c == Console.CONTROL_C_BYTE) {
-				Kernel.getInstance().killProcessAndParents(pid);
-				return null;
 			}
 			if(c == Console.CONTROL_D_BYTE) return null;							// Finishes stdin
 		} catch (IOException e) {
@@ -407,5 +389,13 @@ public class Shell extends AbstractProcess {
 	 */
 	public void printError(String error) {
 		console.printNewLine(error);
+	}
+
+	/**
+	 * Kills running process.
+	 */
+	public void killCurrentProcess() {
+		Kernel.getInstance().killProcessAndParents(runningProcess);
+		runningProcess = -1;
 	}
 }

@@ -182,9 +182,10 @@ public class Console extends JTextPane {
     private void insideCommandBehaviour(KeyEvent e) {
         try {
             if(e.isControlDown() && e.getKeyCode() == KeyEvent.VK_D) {
+                output.write(getLastLine().getBytes());
                 output.write(CONTROL_D_BYTE);                    // Byte 4 - CTRL + D signal
             } else if(e.isControlDown() && e.getKeyCode() == KeyEvent.VK_C) {
-                output.write(CONTROL_C_BYTE);                    // Byte 3 - CTRL + C signal
+                shell.killCurrentProcess();                     // CTRL + C signal
             } else if(e.getKeyCode() == KeyEvent.VK_ENTER) {
                 output.write((getLastLine() + "\n").getBytes());
             }

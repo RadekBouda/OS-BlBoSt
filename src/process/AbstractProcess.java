@@ -113,11 +113,11 @@ public abstract class AbstractProcess extends Thread {
 	/**
 	 * Recursive call of subprocesses.
 	 */
-	protected void callSubProcess() {
-		if(commands == null || commands.size() < 1) return;	// Commands undefined or empty
+	protected int callSubProcess() {
+		if(commands == null || commands.size() < 1) return -1;	// Commands undefined or empty
 		int position = commands.size() - 1;					// Last position in commands
 		int arguments = commands.get(position).size() + 4;	// Arguments size depends on tokens in specific command. +4 stands for pid, parentPid, input, shell and commands list
-		if(builtin(commands.get(position))) return;			// Commands before builtin function are not executed (bash like)
+		if(builtin(commands.get(position))) return -1;			// Commands before builtin function are not executed (bash like)
 		Object args[] = new Object[arguments];				// LEAVE PID EMPTY FOR KERNEL!
 		args[1] = pid;
 		args[2] = input;
@@ -128,23 +128,18 @@ public abstract class AbstractProcess extends Thread {
 		}
 		int processPid = Kernel.getInstance().newProcess(commands.get(position).get(0), args);	// Asks kernel for process and gets pid.
 
-		try {
-			if(processPid == -1) {			// 	-1 - Process not found
-				shell.printError("-BBShell: " + commands.get(position).get(0) + " is not a valid process!\n");
-				output.close();
-			} else if(processPid == -2) {	// -2 - Wrong arguments of method
-				shell.printHelp(commands.get(position).get(0));
-				output.close();
-			} else if(processPid == -3) {
-				shell.printError("-BBShell: Unkown error of " + commands.get(position).get(0));
-				output.close();
-			} else {
-				addChildPid(processPid);
-				Kernel.getInstance().startProcess(processPid);		// Launch process
-			}
-		} catch (IOException e) {
-			return;
+		if (processPid == -1) {            	// 	-1 - Process not found
+			shell.printError("-BBShell: " + commands.get(position).get(0) + " is not a valid process!\n");
+		} else if (processPid == -2) {    	// -2 - Wrong arguments of method
+			shell.printHelp(commands.get(position).get(0));
+		} else if (processPid == -3) {		// -3 - Other errors
+			shell.printError("-BBShell: Unkown error of " + commands.get(position).get(0));
+		} else {
+			addChildPid(processPid);
+			Kernel.getInstance().startProcess(processPid);        // Launch process
 		}
+
+		return processPid;
 	}
 
 	/**
@@ -176,7 +171,6 @@ public abstract class AbstractProcess extends Thread {
 			int c;
 			StringBuilder builder = new StringBuilder();
 			while ((c = input.read()) != -1) {
-				if(c == Console.CONTROL_C_BYTE) return null;
 				if(c != '\r'){ builder.append((char) c);}
 			}
 			return builder.toString();
