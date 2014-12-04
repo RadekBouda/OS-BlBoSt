@@ -1,5 +1,7 @@
 package process;
 
+import kernel.Kernel;
+
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -54,7 +56,7 @@ public class Man extends AbstractProcess{
                 output.close();
                 return;
             }
-            Method man = Class.forName("process." + manPage.substring(0, 1).toUpperCase() + manPage.substring(1, manPage.length()).toLowerCase()).getDeclaredMethod("getMan");
+            Method man = Class.forName(Kernel.PACKAGE + "." + manPage.substring(0, 1).toUpperCase() + manPage.substring(1, manPage.length()).toLowerCase()).getDeclaredMethod("getMan");
             output.write(man.invoke(null, null).toString().getBytes());
             output.close();
         } catch (IOException e) {
@@ -63,7 +65,7 @@ public class Man extends AbstractProcess{
         } catch (ClassNotFoundException e) {
             //unknown command
             try {
-                shell.printError("Man error: " + this.manPage + " is an unknown process.");
+                shell.printError("man: " + this.manPage + " is an unknown process.");
                 output.close();
             } catch (IOException ex) {
                 // error during IO with console, can't be printed to the console because the problem is communicating with a console
@@ -73,7 +75,7 @@ public class Man extends AbstractProcess{
         } catch (NoSuchMethodException e) {
             // manual page for a process is not defined (process class doesn't contain public static String getMan() method)
             try {
-                shell.printError("Man error: Manual page for process " + this.manPage + " not ready yet.");
+                shell.printError("man: Manual page for process " + this.manPage + " not ready yet.");
                 output.close();
             } catch (IOException ex) {
                 // error during IO with console, can't be printed to the console because the problem is communicating with a console

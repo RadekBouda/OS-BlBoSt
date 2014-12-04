@@ -42,7 +42,7 @@ public class Wc extends AbstractProcess {
     private void pipedInput() {
         try {
             String text = getStringFromInput();
-            if(text == null) output.write("0".getBytes());
+            if(text == null || text.equals("")) output.write("0".getBytes());
             else output.write((text.split("\n").length + "").getBytes());
             output.close();
         } catch (IOException e) {

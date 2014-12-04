@@ -387,7 +387,7 @@ public class Shell extends AbstractProcess {
 	 */
 	public void printHelp(String process) {
 		try {
-			printError((String) Class.forName(process).getMethod("getMan").invoke(null, null));
+			printError((String) Class.forName(Kernel.PACKAGE + "." + process.substring(0, 1).toUpperCase() + process.substring(1).toLowerCase()).getMethod("getMan").invoke(null, null));
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
 		} catch (InvocationTargetException e) {

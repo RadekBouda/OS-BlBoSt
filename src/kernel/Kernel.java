@@ -22,7 +22,7 @@ import java.util.*;
  */
 public class Kernel {
 	/** Package with processes */
-	private static final String PACKAGE = "process";
+	public static final String PACKAGE = "process";
 	/** PID counter */
 	private int PID;
 	/** Table of processes */
