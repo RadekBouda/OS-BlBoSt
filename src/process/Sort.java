@@ -68,7 +68,7 @@ public class Sort extends AbstractProcess {
             ArrayList<String> lines = new ArrayList<String>();
             String currentLine = "";
 
-            while((currentLine = shell.getLine(getPid())) != null){
+            while((currentLine = shell.getLine()) != null){
                 lines.add(currentLine);
             }
 

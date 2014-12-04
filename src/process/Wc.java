@@ -56,8 +56,8 @@ public class Wc extends AbstractProcess {
     private void stdInput() {
         try {
             int count = 0;
-            while(shell.getLine(getPid()) != null) count++;
-            output.write(("" + count).getBytes());
+            while(shell.getLine() != null) count++;
+            output.write(("" + (count + 1)).getBytes());
             output.close();
         } catch (IOException e) {
             return;
