@@ -123,20 +123,25 @@ public abstract class AbstractProcess extends Thread {
 		if (arguments > 5) {								// Optional arguments	5 - is default
 			for (int i = 5, j = 1; i < arguments; i++, j++) args[i] = commands.get(position).get(j);
 		}
-		AbstractProcess process = Kernel.getInstance().newProcess(commands.get(position).get(0), args);	// Get process from kernel
+		int processPid = Kernel.getInstance().newProcess(commands.get(position).get(0), args);	// Asks kernel for process and gets pid.
 
-		if(process == null) {
-			try {
-				output.write((commands.get(position).get(0) + " is not a valid process!\n").getBytes());	// Send error to pipe
+		try {
+			if(processPid == -1) {			// 	-1 - Process not found
+				shell.printError("-BBShell: " + commands.get(position).get(0) + " is not a valid process!\n");
 				output.close();
-			} catch (IOException e) {
-				e.printStackTrace();
+			} else if(processPid == -2) {	// -2 - Wrong arguments of method
+				shell.printHelp(commands.get(position).get(0));
+				output.close();
+			} else if(processPid == -3) {
+				shell.printError("-BBShell: Unkown error of " + commands.get(position).get(0));
+				output.close();
+			} else {
+				addChildPid(processPid);
+				Kernel.getInstance().startProcess(processPid);		// Launch process
 			}
-			return;
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-
-		addChildPid(process.getPid());
-		process.start();										// Launch process
 	}
 
 	/**

@@ -51,7 +51,7 @@ public class Ls extends AbstractProcess {
         try {
             File directory = new File(shell.getPath(path));
             if(!directory.exists()){
-                output.write(("LS Error: Directory "+path+ " does not exist.").getBytes());
+                shell.printError("ls: " + path + ": no such a file or directory");
                 output.close();
                 return;
             }

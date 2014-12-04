@@ -45,7 +45,7 @@ public class Kill extends AbstractProcess {
                     output.close();
                 }
             } catch (NumberFormatException e) {
-                output.write("Wrong format of pid!".getBytes());
+                shell.printError("Kill: " + pidToKill + ": Wrong format of pid!");
                 output.close();
             }
         } catch (IOException e) {

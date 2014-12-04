@@ -80,11 +80,14 @@ public class Kernel {
 	/**
 	 * Creates a new process with given name and arguments.
 	 *
+	 * Errors:  -1 - Process not found
+	 * 		   	-2 - Wrong arguments of method
+	 *			-3 - Other errors
 	 * @param process process name
 	 * @param arguments constructor parameters
-	 * @return process
+	 * @return pid or error
 	 */
-	public AbstractProcess newProcess(String process, Object[] arguments) {
+	public int newProcess(String process, Object[] arguments) {
 		try {
 			process = process.substring(0, 1).toUpperCase() +  process.substring(1, process.length()).toLowerCase(); // Makes processes case insensitive!
 			Class myClass = Class.forName(PACKAGE + "." + process);		// Finds the class
@@ -102,20 +105,29 @@ public class Kernel {
 			AbstractProcess proc = (AbstractProcess) instance;			// Retypes to AbstractProcess
 			increasePID();												// Increases pid
 			processes.put(proc.getPid(), proc);							// Adds to the process table
-			return proc;												// Returns the process
+			return proc.getPid();												// Returns the process
 		} catch (ClassNotFoundException e) {				// TODO: Wrong arguments etc.
-			System.out.println(process + " is not a valid process");
-			return null;
+			return -1;
 		} catch (InvocationTargetException e) {
 			e.printStackTrace();
 		} catch (NoSuchMethodException e) {
-			e.printStackTrace();
+			return -2;
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
 		}
-		return null;
+		return -3;
+	}
+
+	/**
+	 * Start process from process table by pid.
+	 *
+	 * @param pid process id
+	 * @return abstractProcess
+	 */
+	public void startProcess(int pid) {
+		processes.get(pid).start();
 	}
 
 	/**

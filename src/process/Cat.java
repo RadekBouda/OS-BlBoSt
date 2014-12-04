@@ -40,7 +40,7 @@ public class Cat extends AbstractProcess {
             output.close();
         } catch (FileNotFoundException e) {
             try {
-                output.write("File not found".getBytes());
+                shell.printError("Cat: " + path + ": No such a file or directory");
                 output.close();
             } catch (IOException e1) {
                 e1.printStackTrace();

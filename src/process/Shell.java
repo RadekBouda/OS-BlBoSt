@@ -7,6 +7,7 @@ import kernel.Kernel;
 import kernel.Run;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -378,4 +379,32 @@ public class Shell extends AbstractProcess {
 	public static String getMan(){
 		return "No manual entry for Shell.\n";
     }
+
+	/**
+	 * In case of wrong arguments.
+	 *
+	 * @param process name
+	 */
+	public void printHelp(String process) {
+		try {
+			printError((String) Class.forName(process).getMethod("getMan").invoke(null, null));
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			printError("Bad usage! No manual entry for " + process + ".");
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Prints error on console.
+	 *
+	 * @param error message
+	 */
+	public void printError(String error) {
+		console.printNewLine(error);
+	}
 }
