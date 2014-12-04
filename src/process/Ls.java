@@ -26,6 +26,7 @@ public class Ls extends AbstractProcess {
     public Ls(int pid, int parentPid, PipedInputStream input, List<List<String>> commands, Shell shell) {
         super(pid, parentPid, input, commands, shell);
         this.path = "";
+        helpOnly = false;
     }
 
     /**
@@ -40,7 +41,13 @@ public class Ls extends AbstractProcess {
      */
     public Ls(int pid, int parentPid, PipedInputStream input, List<List<String>> commands, Shell shell, String path) {
         super(pid, parentPid, input, commands, shell);
-        this.path = path;
+        if(path.equalsIgnoreCase(AbstractProcess.HELP_COMMAND)){
+            helpOnly = true;
+            this.path = "";
+        } else {
+            helpOnly = false;
+            this.path = path;
+        }
     }
 
     /**
@@ -48,6 +55,15 @@ public class Ls extends AbstractProcess {
      */
     @Override
     protected void processRun() {
+        if(helpOnly){
+            try{
+                output.write(getMan().getBytes());
+                output.close();
+                return;
+            } catch (IOException e){
+                return;
+            }
+        }
         try {
             File directory = new File(shell.getPath(path));
             if(!directory.exists()){

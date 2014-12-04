@@ -25,7 +25,14 @@ public class Cat extends AbstractProcess {
      */
     public Cat(int pid, int parentPid, PipedInputStream input, List<List<String>> commands, Shell shell, String path) {
         super(pid, parentPid, input, commands, shell);
-        this.path = shell.getPath(path);
+
+        if(path.equalsIgnoreCase(AbstractProcess.HELP_COMMAND)){
+            helpOnly = true;
+        } else {
+            helpOnly = false;
+            this.path = shell.getPath(path);
+        }
+
     }
 
     /**
@@ -33,6 +40,15 @@ public class Cat extends AbstractProcess {
      */
     @Override
     protected void processRun() {
+        if(helpOnly){
+            try{
+            output.write(getMan().getBytes());
+            output.close();
+            return;
+            } catch (IOException e){
+                return;
+            }
+        }
         try {
             int c;
             BufferedReader reader = new BufferedReader(new FileReader(new File(path)));
@@ -40,7 +56,7 @@ public class Cat extends AbstractProcess {
             output.close();
         } catch (FileNotFoundException e) {
             try {
-                shell.printError("cat: " + path + ": No such a file or directory");
+                shell.printError("cat: " + path + ": No such a file or directory.");
                 output.close();
             } catch (IOException e1) {
                 return;

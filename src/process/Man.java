@@ -28,7 +28,13 @@ public class Man extends AbstractProcess{
      */
     public Man(int pid, int parentPid, PipedInputStream input, List<List<String>> commands, Shell shell, String manPage) {
         super(pid, parentPid, input, commands, shell);
-        this.manPage = manPage;
+        if(manPage.equalsIgnoreCase(AbstractProcess.HELP_COMMAND)){
+            helpOnly = true;
+        } else {
+            helpOnly = false;
+            this.manPage = manPage;
+        }
+
     }
 
     /**
@@ -43,6 +49,7 @@ public class Man extends AbstractProcess{
     public Man(int pid, int parentPid, PipedInputStream input, List<List<String>> commands, Shell shell) {
         super(pid, parentPid, input, commands, shell);
         this.manPage = null;
+        this.helpOnly = false;
     }
 
     /**
@@ -50,6 +57,16 @@ public class Man extends AbstractProcess{
      */
     @Override
     protected void processRun() {
+        if(helpOnly){
+            try{
+                output.write(getMan().getBytes());
+                output.close();
+                return;
+            } catch (IOException e){
+                return;
+            }
+        }
+
         try {
             if (manPage == null || manPage.equals("")) {
                 output.write("Default shell man".getBytes());

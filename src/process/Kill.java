@@ -25,7 +25,13 @@ public class Kill extends AbstractProcess {
      */
     public Kill(int pid, int parentPid, PipedInputStream input, List<List<String>> commands, Shell shell, String pidToKill) {
         super(pid, parentPid, input, commands, shell);
-        this.pidToKill = pidToKill;
+        if(pidToKill.equalsIgnoreCase(AbstractProcess.HELP_COMMAND)){
+            helpOnly = true;
+        } else {
+            helpOnly = false;
+            this.pidToKill = pidToKill;
+        }
+
     }
 
     /**
@@ -33,6 +39,15 @@ public class Kill extends AbstractProcess {
      */
     @Override
     protected void processRun() {
+        if(helpOnly){
+            try{
+                output.write(getMan().getBytes());
+                output.close();
+                return;
+            } catch (IOException e){
+                return;
+            }
+        }
         try {
             int pid;
             try {
