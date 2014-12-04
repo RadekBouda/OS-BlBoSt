@@ -172,7 +172,7 @@ public class Console extends JTextPane {
     private void insideCommandBehaviour(KeyEvent e) {
         try {
             if(e.isControlDown() && e.getKeyCode() == KeyEvent.VK_D) {
-                output.write(0);
+                output.write(0);                    // Byte 0 - CTRL + D signal
             } else {
                 output.write(e.getKeyCode());
             }

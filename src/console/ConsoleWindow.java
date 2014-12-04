@@ -34,7 +34,7 @@ public class ConsoleWindow extends javax.swing.JFrame {
     private void initComponents(final Shell shell) {
         console = new Console(shell);
 
-        this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE); // Done by window listener
         this.setLocationRelativeTo(null);
 
         this.setTitle("OS Simulator - BlBoSt Team");
@@ -46,6 +46,12 @@ public class ConsoleWindow extends javax.swing.JFrame {
         this.add(jsp, BorderLayout.CENTER);
 
         this.addWindowListener(new WindowAdapter() {
+
+            /**
+             * Closes shell on exit.
+             *
+             * @param e
+             */
             @Override
             public void windowClosing(WindowEvent e) {
                 shell.exit();
@@ -53,6 +59,9 @@ public class ConsoleWindow extends javax.swing.JFrame {
         });
     }
 
+    /**
+     * Closes console. Creates new Thread for closing.
+     */
     public void closeConsole() {
         this.setVisible(false);
         final JFrame that = this;

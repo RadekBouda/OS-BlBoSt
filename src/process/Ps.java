@@ -69,7 +69,7 @@ public class Ps extends AbstractProcess {
      * Returns a manual page of a process.
      * @return Manual page
      */
-    public static String getMan(){
+    public static String getMan() {
     return "------------------ PS PROCESS ------------------\n"+
             "- report a snapshot of the current processes.\n\n"+
             "Syntax: ps\n"+

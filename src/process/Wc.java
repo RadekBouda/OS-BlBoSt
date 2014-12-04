@@ -42,7 +42,8 @@ public class Wc extends AbstractProcess {
     private void pipedInput() {
         try {
             String text = getStringFromInput();
-            output.write((text.split("\n").length + "").getBytes());
+            if(text == null) output.write("0".getBytes());
+            else output.write((text.split("\n").length + "").getBytes());
             output.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -67,7 +68,7 @@ public class Wc extends AbstractProcess {
     * Returns a manual page of a process.
     * @return Manual page
     */
-    public static String getMan(){
+    public static String getMan() {
     return "------------------ WC PROCESS ------------------\n"+
             "- print the number of newlines in files\n\n"+
             "Syntax: wc <file>\n"+

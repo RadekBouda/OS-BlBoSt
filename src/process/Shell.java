@@ -7,9 +7,11 @@ import kernel.Kernel;
 import kernel.Run;
 
 import java.io.*;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+
+// TODO: Man page
+// TODO: Builtin commands man page
 
 /**
  * Shell is a user interface for access to an operating system's services.
@@ -115,15 +117,13 @@ public class Shell extends AbstractProcess {
 		if(!process) console.setInCommand(true);							// Console inside command
 		Parser parser = new Parser(line);   								// Parses the line
 		commands = parser.getAllCommands();
-		if(!builtinCommand(commands.get(0))) {								// No builtin command
-			this.input = new PipedInputStream(PIPE_BUFFER_SIZE);
-			redirectInput(parser.getInputFile());
-			callSubProcess();
-			String output = getStringFromInput();
-			if(!running) return;											// Self killing check
-			if(output == null) output = readOwnOutput();					// Problem with first command
-			redirectOutput(parser.getOutputFile(), output);
-		}
+		this.input = new PipedInputStream(PIPE_BUFFER_SIZE);
+		redirectInput(parser.getInputFile());
+		callSubProcess();
+		String output = getStringFromInput();
+		if(!running) return;											// Self killing check
+		if(output == null) output = readOwnOutput();					// Problem with first command
+		redirectOutput(parser.getOutputFile(), output);
 		if(!process) console.setInCommand(false);							// Console outside command
 	}
 
@@ -149,19 +149,53 @@ public class Shell extends AbstractProcess {
 	 * @param command parsed commands
 	 * @return true/false
 	 */
-	private boolean builtinCommand(List<String> command) {
+	public boolean builtinCommand(List<String> command, PipedInputStream input) {
 		if(command.get(0).equals("cd")) {
-			if(command.size() == 1) cd("");
-			else cd(command.get(1));
+			if(command.size() < 2) return true;
+			cd(command.get(1));
 			return true;
-		} else if(command.get(0).equals("pwd")) {
-			pwd();
+		}
+		if(command.get(0).equals("pwd")) {
+			pwd(input);
 			return true;
-		} else if(command.get(0).equals("exit")) {
+		}
+		if(command.get(0).equals("exit")) {
 			exit();
 			return true;
 		}
+		if(command.get(0).equals("echo")) {
+			echo(command, input);
+			return true;
+		}
 		return false;
+	}
+
+	/**
+	 * Print results into pipe.
+	 * Separate thread because of the builtin command is called from the same thread as the following command.
+	 *
+	 * @param text result
+	 * @param input input pipe
+	 */
+	private void printIntoInputPipe(final String text, final PipedInputStream input) {
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					PipedOutputStream output = new PipedOutputStream(input);
+					output.write(text.getBytes());
+					output.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+		t.start();
+		try {
+			t.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 	// TODO: UTF-8!
@@ -247,7 +281,7 @@ public class Shell extends AbstractProcess {
 		try {
 			String fileName = path.length() > 0 && path.charAt(0) == File.separatorChar ? this.root + File.separatorChar + path:this.path + File.separatorChar + path; // Absolute or relative path
 			String file = new File(fileName).getCanonicalPath();
-			if(!file.matches("^" + root.replaceAll("\\\\", "\\\\\\\\") + ".*")) return null;			// Checking borders
+			if(!file.matches("^" + root.replaceAll("\\\\", "\\\\\\\\") + ".*")) return null;			// Checking borders - REGEX Windows hack :D
 			return file;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -264,8 +298,6 @@ public class Shell extends AbstractProcess {
 		this.path = path;
 	}
 
-	// TODO: Pretty outputs
-
 	/**
 	 * Change directory command.
 	 * Prints current location.
@@ -274,26 +306,17 @@ public class Shell extends AbstractProcess {
 	 */
 	private void cd(String param) {
 		try {
-			if(param.equals("")) {								// Cd without params -> go to user folder
-				setPath(root);
-				console.printResults(getPath(""));
-				return;
-			}
+			if(param.equals("")) setPath(root);					// Cd without params -> go to user folder
 			String path = getPath(param);
-			if(path == null) {									// Trying to go out of filesystem
-				console.printResults(getPath(""));
-				return;
-			}
+			if(path == null) return;							// Trying to go out of filesystem
 			File folder = new File(path);
-			System.out.println(path);
 			if(!folder.exists()) {
-				console.printResults("No such a file or directory!");
+				console.printNewLine("No such a file or directory!");
 			} else {
 				if(!folder.isDirectory()) {
-					console.printResults("Not a directory!");
+					console.printNewLine("Not a directory!");
 				} else {
 					setPath(folder.getCanonicalPath());
-					console.printResults("");
 				}
 			}
 		} catch (IOException e) {
@@ -313,8 +336,21 @@ public class Shell extends AbstractProcess {
 	/**
 	 * Prints current path.
 	 */
-	private void pwd() {
-		console.printResults(getPath(""));
+	private void pwd(PipedInputStream input) {
+		printIntoInputPipe(getPath(""), input);
+	}
+
+	/**
+	 * Prints arguments.
+	 *
+	 * @param arguments arguments
+	 * @param input piped input
+	 */
+	public void echo(List<String> arguments, PipedInputStream input) {
+		String text = "";
+		if(arguments.size() == 1) text = "\n ";
+		else for(int i = 1; i < arguments.size(); i++) text += arguments.get(i) + " ";		// Separates by space
+		printIntoInputPipe(text.substring(0, text.length() - 1), input);					// Kills last space
 	}
 
 	/**
@@ -335,11 +371,11 @@ public class Shell extends AbstractProcess {
 		return "BBShell:" + parts[parts.length-1] + " root$ ";
 	}
         
-        /**
-         * Returns a manual page of a process.
-         * @return Manual page
-         */
-            public static String getMan(){
-                return "No manual entry for Shell.\n";
+	/**
+	 * Returns a manual page of a process.
+	 * @return Manual page
+	 */
+	public static String getMan(){
+		return "No manual entry for Shell.\n";
     }
 }

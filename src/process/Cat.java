@@ -54,7 +54,7 @@ public class Cat extends AbstractProcess {
      * Returns a manual page of a process.
      * @return Manual page
      */
-    public static String getMan(){
+    public static String getMan() {
     return "------------------ CAT PROCESS ------------------\n"+
             "- concatenate files and print on the standard output\n"+
             "- can be used with a relative or absolute path as a non-compulsory parameter\n\n"+

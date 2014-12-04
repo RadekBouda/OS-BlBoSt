@@ -114,12 +114,13 @@ public abstract class AbstractProcess extends Thread {
 		if(commands == null || commands.size() < 1) return;	// Commands undefined or empty
 		int position = commands.size() - 1;					// Last position in commands
 		int arguments = commands.get(position).size() + 4;	// Arguments size depends on tokens in specific command. +4 stands for pid, parentPid, input, shell and commands list
+		if(builtin(commands.get(position))) return;			// Commands before builtin function are not executed (bash like)
 		Object args[] = new Object[arguments];				// LEAVE PID EMPTY FOR KERNEL!
 		args[1] = pid;
 		args[2] = input;
 		args[3] = commands.subList(0, position);
 		args[4] = shell;
-		if (arguments > 5) {								// Optional arguments
+		if (arguments > 5) {								// Optional arguments	5 - is default
 			for (int i = 5, j = 1; i < arguments; i++, j++) args[i] = commands.get(position).get(j);
 		}
 		AbstractProcess process = Kernel.getInstance().newProcess(commands.get(position).get(0), args);	// Get process from kernel
@@ -136,6 +137,16 @@ public abstract class AbstractProcess extends Thread {
 
 		addChildPid(process.getPid());
 		process.start();										// Launch process
+	}
+
+	/**
+	 * Checks shell builtin commands.
+	 *
+	 * @param command current command
+	 * @return true/false
+	 */
+	protected boolean builtin(List<String> command) {
+		return shell.builtinCommand(command, (PipedInputStream) input);
 	}
 
 	/**
