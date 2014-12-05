@@ -81,19 +81,27 @@ public class Parser {
 
 	private ArrayList<String> getCommand() {
 		ArrayList<String> result = new ArrayList<String>();
+		boolean insideQuotes = false;
 		String word;
 		do {
+
 			consumeWhiteSpaces();
 			word = "";
-			while (!(isFinished || Character.isWhitespace(parsed_char)
+			while ((!(isFinished || Character.isWhitespace(parsed_char)
 					|| parsed_char == PIPE
-					|| parsed_char == IN_REROUTE || parsed_char == OUT_REROUTE)) {
+					|| parsed_char == IN_REROUTE || parsed_char == OUT_REROUTE)) || insideQuotes) {
+				if(parsed_char == '"'){
+					if (!insideQuotes) insideQuotes = true;
+					else insideQuotes = false;
+				}
 				word += parsed_char;
 				nextChar();
+				if(isFinished) break; // anti-idiot fail-safe
 			}
 			if (word.length() > 0) {
-				result.add(word);
+				result.add(word.replaceAll("\"",""));
 				System.out.println(word);
+				if(isFinished) break;
 			}
 		} while (word.length() > 0);
 		return result;
@@ -102,18 +110,24 @@ public class Parser {
 	private String getReroutes() {
 		String result = "";
 		consumeWhiteSpaces();
+		boolean insideQuotes = false;
 		if (isFinished || parsed_char == IN_REROUTE
 				|| parsed_char == OUT_REROUTE
 				|| parsed_char == PIPE) {
 			return "";
 		}
 		do {
+			if(parsed_char == '"'){
+				if (!insideQuotes) insideQuotes = true;
+				else insideQuotes = false;
+			}
 			result += parsed_char;
 			nextChar();
+			if(isFinished) break; // anti-idiot failsafe
 		} while (!(isFinished || Character.isWhitespace(parsed_char)
 				|| parsed_char == IN_REROUTE
-				|| parsed_char == OUT_REROUTE || parsed_char == PIPE));
-		return result;
+				|| parsed_char == OUT_REROUTE || parsed_char == PIPE) || insideQuotes);
+		return result.replaceAll("\"", "");
 	}
 
 	private void consumeWhiteSpaces() {
