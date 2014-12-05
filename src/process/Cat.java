@@ -28,7 +28,7 @@ public class Cat extends AbstractProcess {
 
         if(path.equalsIgnoreCase(AbstractProcess.HELP_COMMAND)){
             helpOnly = true;
-            this.path = null
+            this.path = null;
         } else {
             helpOnly = false;
             this.path = shell.getPath(path);
