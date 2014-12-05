@@ -414,7 +414,7 @@ public class Shell extends AbstractProcess {
 	 */
 	public String getConsolePrefix() {
 		String parts[] = path.split(Run.getPathSeparatorForSplit());
-		String current = parts[parts.length-1].equals(FILESYSTEM_DIR_NAME) ? "/":parts[parts.length-1];
+		String current = parts[parts.length-1].equals(FILESYSTEM_DIR_NAME) ? "/":parts[parts.length-1];		// Root
 		return "BBShell:" + current + " root$ ";
 	}
         
