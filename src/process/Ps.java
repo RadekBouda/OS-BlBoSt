@@ -1,10 +1,9 @@
 package process;
 
-import helpers.BBInputStream;
+import helpers.BBPipedInputStream;
 import kernel.Kernel;
 
 import java.io.IOException;
-import java.io.PipedInputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,7 +24,7 @@ public class Ps extends AbstractProcess {
      * @param commands list of commands
      * @param shell parent shell
      */
-    public Ps(int pid, int parentPid, BBInputStream input, List<List<String>> commands, Shell shell) {
+    public Ps(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell) {
         super(pid, parentPid, input, commands, shell);
     }
 

@@ -2,12 +2,11 @@ package helpers;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PipedOutputStream;
 
 /**
  * Created by Radek on 5. 12. 2014.
  */
-public class BBInputStream extends InputStream {
+public class BBPipedInputStream extends InputStream {
 
     boolean closedByWriter = false;
     volatile boolean closedByReader = false;
@@ -63,7 +62,7 @@ public class BBInputStream extends InputStream {
      * @param      src   the stream to connect to.
      * @exception java.io.IOException  if an I/O error occurs.
      */
-    public BBInputStream(BBOutputStream src) throws IOException {
+    public BBPipedInputStream(BBPipedOutputStream src) throws IOException {
         this(src, DEFAULT_PIPE_SIZE);
     }
 
@@ -81,7 +80,7 @@ public class BBInputStream extends InputStream {
      * @exception  IllegalArgumentException if {@code pipeSize <= 0}.
      * @since      1.6
      */
-    public BBInputStream(BBOutputStream src, int pipeSize)
+    public BBPipedInputStream(BBPipedOutputStream src, int pipeSize)
             throws IOException {
         initPipe(pipeSize);
         connect(src);
@@ -94,7 +93,7 @@ public class BBInputStream extends InputStream {
      * java.io.PipedInputStream) connected} to a
      * <code>PipedOutputStream</code> before being used.
      */
-    public BBInputStream() {
+    public BBPipedInputStream() {
         initPipe(DEFAULT_PIPE_SIZE);
     }
 
@@ -109,7 +108,7 @@ public class BBInputStream extends InputStream {
      * @exception  IllegalArgumentException if {@code pipeSize <= 0}.
      * @since      1.6
      */
-    public BBInputStream(int pipeSize) {
+    public BBPipedInputStream(int pipeSize) {
         initPipe(pipeSize);
     }
 
@@ -143,7 +142,7 @@ public class BBInputStream extends InputStream {
      * @param      src   The piped output stream to connect to.
      * @exception  IOException  if an I/O error occurs.
      */
-    public void connect(BBOutputStream src) throws IOException {
+    public void connect(BBPipedOutputStream src) throws IOException {
         src.connect(this);
     }
 

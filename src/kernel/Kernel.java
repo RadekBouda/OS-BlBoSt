@@ -4,12 +4,11 @@
  */
 package kernel;
 
-import helpers.BBInputStream;
+import helpers.BBPipedInputStream;
 import process.AbstractProcess;
 import process.Shell;
 
 import java.io.File;
-import java.io.PipedInputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -97,7 +96,7 @@ public class Kernel {
 			Class<?>[] types = new Class[arguments.length];				// Types of arguments
 			types[0] = int.class;										// First always pid
 			types[1] = int.class;										// Second always father pid
-			types[2] = BBInputStream.class;							// Third always input stream
+			types[2] = BBPipedInputStream.class;							// Third always input stream
 			types[3] = List.class;										// Fourth always List with rest of commands
 			types[4] = Shell.class;										// Fifth always shell
 			for(int i = 5; i < arguments.length; i++) types[i] = arguments[i].getClass();	// Fills optional arguments

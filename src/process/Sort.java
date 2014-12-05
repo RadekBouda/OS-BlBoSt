@@ -1,9 +1,8 @@
 package process;
 
-import helpers.BBInputStream;
+import helpers.BBPipedInputStream;
 
 import java.io.IOException;
-import java.io.PipedInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -23,7 +22,7 @@ public class Sort extends AbstractProcess {
      * @param commands list with commands
      * @param shell parent shell
      */
-    public Sort(int pid, int parentPid, BBInputStream input, List<List<String>> commands, Shell shell) {
+    public Sort(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell) {
         super(pid, parentPid, input, commands, shell);
     }
 

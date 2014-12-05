@@ -1,10 +1,9 @@
 package process;
 
-import helpers.BBInputStream;
+import helpers.BBPipedInputStream;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PipedInputStream;
 import java.util.List;
 
 /**
@@ -25,7 +24,7 @@ public class Ls extends AbstractProcess {
      * @param commands list of commands
      * @param shell parent shell
      */
-    public Ls(int pid, int parentPid, BBInputStream input, List<List<String>> commands, Shell shell) {
+    public Ls(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell) {
         super(pid, parentPid, input, commands, shell);
         this.path = "";
         helpOnly = false;
@@ -41,7 +40,7 @@ public class Ls extends AbstractProcess {
      * @param shell parent shell
      * @param path desired path
      */
-    public Ls(int pid, int parentPid, BBInputStream input, List<List<String>> commands, Shell shell, String path) {
+    public Ls(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell, String path) {
         super(pid, parentPid, input, commands, shell);
         if(path.equalsIgnoreCase(AbstractProcess.HELP_COMMAND)){
             helpOnly = true;

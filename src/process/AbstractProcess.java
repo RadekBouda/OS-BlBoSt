@@ -1,8 +1,8 @@
 package process;
 
 import console.Console;
-import helpers.BBInputStream;
-import helpers.BBOutputStream;
+import helpers.BBPipedInputStream;
+import helpers.BBPipedOutputStream;
 import kernel.Kernel;
 
 import java.io.*;
@@ -49,16 +49,16 @@ public abstract class AbstractProcess extends Thread {
 	 * @param commands list of commands
 	 * @param shell parent shell
 	 */
-	public AbstractProcess(int pid, int parentPid, BBInputStream input, List<List<String>> commands, Shell shell) {
+	public AbstractProcess(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell) {
 		this.childPids = new ArrayList<Integer>();
 		this.parentPid = parentPid;
 		this.pid = pid;
 		this.commands = commands;
 		this.shell = shell;
 		this.startTime = System.currentTimeMillis();
-		this.input = new BBInputStream(PIPE_BUFFER_SIZE);
+		this.input = new BBPipedInputStream(PIPE_BUFFER_SIZE);
 		try {
-			if(input != null) this.output = new BBOutputStream(input);
+			if(input != null) this.output = new BBPipedOutputStream(input);
 		} catch (IOException e) {}
 	}
 
@@ -151,7 +151,7 @@ public abstract class AbstractProcess extends Thread {
 	 * @return true/false
 	 */
 	protected boolean builtin(List<String> command) {
-		return shell.builtinCommand(command, (BBInputStream) input);
+		return shell.builtinCommand(command, (BBPipedInputStream) input);
 	}
 
 	/**

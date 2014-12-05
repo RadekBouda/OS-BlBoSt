@@ -2,17 +2,16 @@ package helpers;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PipedInputStream;
 
 /**
  * Created by Radek on 5. 12. 2014.
  */
-public class BBOutputStream extends OutputStream {
+public class BBPipedOutputStream extends OutputStream {
     /* REMIND: identification of the read and write sides needs to be
         more sophisticated.  Either using thread groups (but what about
         pipes within a thread?) or using finalization (but it may be a
         long time until the next GC). */
-    private BBInputStream sink;
+    private BBPipedInputStream sink;
 
     /**
      * Creates a piped output stream connected to the specified piped
@@ -22,7 +21,7 @@ public class BBOutputStream extends OutputStream {
      * @param      snk   The piped input stream to connect to.
      * @exception java.io.IOException  if an I/O error occurs.
      */
-    public BBOutputStream(BBInputStream snk)  throws IOException {
+    public BBPipedOutputStream(BBPipedInputStream snk)  throws IOException {
         connect(snk);
     }
 
@@ -34,7 +33,7 @@ public class BBOutputStream extends OutputStream {
      * @see     java.io.PipedInputStream#connect(java.io.PipedOutputStream)
      * @see     java.io.PipedOutputStream#connect(java.io.PipedInputStream)
      */
-    public BBOutputStream() {
+    public BBPipedOutputStream() {
     }
 
     /**
@@ -55,7 +54,7 @@ public class BBOutputStream extends OutputStream {
      * @param      snk   the piped input stream to connect to.
      * @exception  IOException  if an I/O error occurs.
      */
-    public synchronized void connect(BBInputStream snk) throws IOException {
+    public synchronized void connect(BBPipedInputStream snk) throws IOException {
         if (snk == null) {
             throw new NullPointerException();
         } else if (sink != null || snk.connected) {

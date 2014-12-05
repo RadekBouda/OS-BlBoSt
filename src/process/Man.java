@@ -1,10 +1,9 @@
 package process;
 
-import helpers.BBInputStream;
+import helpers.BBPipedInputStream;
 import kernel.Kernel;
 
 import java.io.IOException;
-import java.io.PipedInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -27,7 +26,7 @@ public class Man extends AbstractProcess{
      * @param shell parent shell
      * @param manPage manual page to show
      */
-    public Man(int pid, int parentPid, BBInputStream input, List<List<String>> commands, Shell shell, String manPage) {
+    public Man(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell, String manPage) {
         super(pid, parentPid, input, commands, shell);
         if(manPage.equalsIgnoreCase(AbstractProcess.HELP_COMMAND)){
             helpOnly = true;
@@ -47,7 +46,7 @@ public class Man extends AbstractProcess{
      * @param commands list with commands
      * @param shell parent shell
      */
-    public Man(int pid, int parentPid, BBInputStream input, List<List<String>> commands, Shell shell) {
+    public Man(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell) {
         super(pid, parentPid, input, commands, shell);
         this.manPage = null;
         this.helpOnly = false;

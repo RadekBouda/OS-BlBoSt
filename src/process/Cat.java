@@ -1,6 +1,6 @@
 package process;
 
-import helpers.BBInputStream;
+import helpers.BBPipedInputStream;
 
 import java.io.*;
 import java.util.List;
@@ -25,7 +25,7 @@ public class Cat extends AbstractProcess {
      * @param shell parent shell
      * @param path Path to file
      */
-    public Cat(int pid, int parentPid, BBInputStream input, List<List<String>> commands, Shell shell, String path) {
+    public Cat(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell, String path) {
         super(pid, parentPid, input, commands, shell);
 
         if(path.equalsIgnoreCase(AbstractProcess.HELP_COMMAND)){
@@ -47,7 +47,7 @@ public class Cat extends AbstractProcess {
      * @param commands List of commands
      * @param shell parent shell
      */
-    public Cat(int pid, int parentPid, BBInputStream input, List<List<String>> commands, Shell shell) {
+    public Cat(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell) {
         super(pid, parentPid, input, commands, shell);
         this.path = null;
     }
