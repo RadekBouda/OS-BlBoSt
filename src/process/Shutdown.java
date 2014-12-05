@@ -32,4 +32,16 @@ public class Shutdown extends AbstractProcess {
     protected void processRun() {
         Kernel.getInstance().shutdown();
     }
+
+    /**
+     * Returns a manual page of a process.
+     * @return Manual page
+     */
+    public static String getMan() {
+        return "------------------ SHUTDOWN PROCESS ------------------\n"+
+                "- terminates whole OS\n\n"+
+                "Syntax: shutdown\n"+
+                "- terminates all running processes\n"+
+                "------------------ MANUAL END ------------------------";
+    }
 }
