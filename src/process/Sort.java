@@ -75,7 +75,6 @@ public class Sort extends AbstractProcess {
             String[] linesField = new String[lines.size()];
             lines.toArray(linesField);
             Arrays.sort(linesField);
-            System.out.println(linesField.length);
             for(String line : linesField){
                 output.write(line.getBytes());
                 output.write("\n".getBytes());
