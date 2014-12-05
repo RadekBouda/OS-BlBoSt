@@ -100,7 +100,6 @@ public class Parser {
 			}
 			if (word.length() > 0) {
 				result.add(word.replaceAll("\"",""));
-				System.out.println(word);
 				if(isFinished) break;
 			}
 		} while (word.length() > 0);
