@@ -21,7 +21,7 @@ public class Wc extends AbstractProcess {
      * @param commands list with commands
      * @param shell parent shell
      */
-    public Wc(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell) {
+    public Wc(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell) throws IOException {
         super(pid, parentPid, input, commands, shell);
     }
 
@@ -47,7 +47,7 @@ public class Wc extends AbstractProcess {
             else output.write((text.split("\n").length + "").getBytes());
             output.close();
         } catch (IOException e) {
-            return;
+            return;                 // Killed process
         }
     }
 
@@ -61,7 +61,7 @@ public class Wc extends AbstractProcess {
             output.write(("" + (count + 1)).getBytes());
             output.close();
         } catch (IOException e) {
-            return;
+            return;                     // Killed process
         }
     }
     

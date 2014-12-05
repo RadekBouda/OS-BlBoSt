@@ -4,8 +4,6 @@
  */
 package kernel;
 
-// TODO: Manage exceptions in whole project!
-
 import java.io.File;
 
 /**

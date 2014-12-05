@@ -5,7 +5,9 @@ import helpers.BBPipedInputStream;
 import helpers.BBPipedOutputStream;
 import kernel.Kernel;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,7 +51,7 @@ public abstract class AbstractProcess extends Thread {
 	 * @param commands list of commands
 	 * @param shell parent shell
 	 */
-	public AbstractProcess(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell) {
+	public AbstractProcess(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell) throws IOException {
 		this.childPids = new ArrayList<Integer>();
 		this.parentPid = parentPid;
 		this.pid = pid;
@@ -57,9 +59,7 @@ public abstract class AbstractProcess extends Thread {
 		this.shell = shell;
 		this.startTime = System.currentTimeMillis();
 		this.input = new BBPipedInputStream(PIPE_BUFFER_SIZE);
-		try {
-			if(input != null) this.output = new BBPipedOutputStream(input);
-		} catch (IOException e) {}
+		if(input != null) this.output = new BBPipedOutputStream(input);
 	}
 
 	/**
@@ -190,9 +190,8 @@ public abstract class AbstractProcess extends Thread {
 			output.close();
 			this.interrupt();
 		} catch (IOException e) {
-			return;
+			return;											// Closed before.
 		}
-
 	}
 
 	/**

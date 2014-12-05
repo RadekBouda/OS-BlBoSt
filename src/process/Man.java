@@ -15,6 +15,7 @@ import java.util.List;
  * @version 1.0.0
  */
 public class Man extends AbstractProcess{
+    /** Desired program's manual page */
     private String manPage;
 
     /**
@@ -27,7 +28,7 @@ public class Man extends AbstractProcess{
      * @param shell parent shell
      * @param manPage manual page to show
      */
-    public Man(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell, String manPage) {
+    public Man(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell, String manPage) throws IOException {
         super(pid, parentPid, input, commands, shell);
         if(manPage.equalsIgnoreCase(AbstractProcess.HELP_COMMAND)){
             helpOnly = true;
@@ -46,7 +47,7 @@ public class Man extends AbstractProcess{
      * @param commands list with commands
      * @param shell parent shell
      */
-    public Man(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell) {
+    public Man(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell) throws IOException {
         super(pid, parentPid, input, commands, shell);
         this.manPage = null;
         this.helpOnly = false;
@@ -58,40 +59,37 @@ public class Man extends AbstractProcess{
     @Override
     protected void processRun() {
         try {
-            if(helpOnly){
-                printOwnHelp();
-            } else if(manPage == null || manPage.equals("")) {
-                noArgsVersion();
-            } else if(!builtInVersion()) {
-                classicProcessVersion();
-            }
-        } catch (IOException e) {
-            // error during IO with console, can't be printed to the console because the problem is communicating with a console
-            return;
-        } catch (ClassNotFoundException e) {
-            //unknown command
             try {
+                if (helpOnly) {
+                    printOwnHelp();
+                } else if (manPage == null || manPage.equals("")) {
+                    noArgsVersion();
+                } else if (!builtInVersion()) {
+                    classicProcessVersion();
+                }
+            } catch (ClassNotFoundException e) {// unknown command
                 shell.printError("man: " + this.manPage + " is an unknown process.");
                 output.close();
-            } catch (IOException ex) {
-                // error during IO with console, can't be printed to the console because the problem is communicating with a console
-                return;
+            } catch (NoSuchMethodException e) {
+                notFoundError();            // manual page for a process is not defined (process class doesn't contain public static String getMan() method)
+            } catch (IllegalAccessException e) {
+                notFoundError();            // Can't access -> unknown command
+            } catch (InvocationTargetException e) {
+                return;                     // Invocation error -> method prints error itself
             }
-
-        } catch (NoSuchMethodException e) {
-            // manual page for a process is not defined (process class doesn't contain public static String getMan() method)
-            try {
-                shell.printError("man: Manual page for process " + this.manPage + " not ready yet.");
-                output.close();
-            } catch (IOException ex) {
-                // error during IO with console, can't be printed to the console because the problem is communicating with a console
-                return;
-            }
-        } catch (IllegalAccessException e) {
-            e.printStackTrace(); // i don't know when this exception can occur
-        } catch (InvocationTargetException e) {
-            e.printStackTrace(); // it will be very big surprise when this exception occur
+        } catch (IOException e) {
+            return;                             // Killed process
         }
+    }
+
+    /**
+     * Prints not found error.
+     *
+     * @throws IOException
+     */
+    private void notFoundError() throws IOException {
+        shell.printError("man: Manual page for process " + this.manPage + " not ready yet.");
+        output.close();
     }
 
     /**

@@ -71,7 +71,7 @@ public class Console extends JTextPane {
             else this.setText(currentText + text);
             setCaretPosition(this.getDocument().getLength());
         } catch (Error e) {
-            return;                 // Kill while writing
+            return;                 // Killed while writing
         }
     }
 
@@ -172,7 +172,7 @@ public class Console extends JTextPane {
                         }
                         return;
                     } catch (BadLocationException e1) {
-                        e1.printStackTrace();
+                        // Bad index in getText - not needed
                     }
                 }
             // Check console state
@@ -200,7 +200,7 @@ public class Console extends JTextPane {
                 output.write((getLastLine() + "\n").getBytes());
             }
         } catch (IOException exc) {
-            return;
+            return;         // Killed process
         }
     }
 

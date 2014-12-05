@@ -3,37 +3,47 @@ package helpers;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO: Clear console output
-
 /**
  * Instances of this class can parse user shell commands into separated commands.
+ *
  * @author Jan Blaha, Radek Bouda, David Steinberger
  * @version 1.1
  */
 public class Parser {
 
+	/** Important characters */
 	private final static char PIPE = '|';
 	private final static char IN_REROUTE = '<';
 	private final static char OUT_REROUTE = '>';
 
+	/** Inner state variables */
 	private String parsed_string;
 	private int parsed_position;
 	private char parsed_char;
 	private boolean isFinished;
 	private List<String> command = new ArrayList<String>();
 	private List<List<String>> allCommands = new ArrayList<List<String>>();
+
+	/** I/O files if available */
 	private String inputFile;
 	private String outputFile;
 
+	/**
+	 * Create new parsed command.
+	 *
+	 * @param line line to parse
+	 */
 	public Parser(String line) {
 		parse(line);
 	}
 
+	/**
+	 * Main parsing method.
+	 *
+	 * @param commandLine line to parse
+	 */
 	private void parse(String commandLine) {
-		if (commandLine.equals("")) {
-			System.out.println("Parser received an empty command.");
-			return;
-		}
+		if (commandLine.equals("")) return;
 
 		parsed_string = commandLine;
 		parsed_position = 0;
@@ -41,44 +51,37 @@ public class Parser {
 		isFinished = false;
 
 		command = getCommand();
-		if (command.isEmpty()) {
-			System.out.println("Parser couldn't parse the command.");
-			return;
-		}
+		if (command.isEmpty()) return;
 		allCommands.add(command);
 
 		consumeWhiteSpaces();
 
-		while (parsed_char == PIPE) {
+		while (parsed_char == PIPE) {				// Read pipes
 			nextChar();
 			command = getCommand();
-			if (command.isEmpty()) {
-				System.out.println("Parser couldn't parse the command defined after pipe character.");
-				return;
-			}
+			if (command.isEmpty()) return;
 			allCommands.add(command);
 			consumeWhiteSpaces();
 		}
 
-		while (parsed_char == IN_REROUTE) {
+		while (parsed_char == IN_REROUTE) {			// In redirection
 			nextChar();
 			inputFile = getReroutes();
-			if (inputFile.length() == 0) {
-				System.out.println("Parser couldn't parse the standard input file reroute.");
-			}
 			consumeWhiteSpaces();
 		}
 
-		while (parsed_char == OUT_REROUTE) {
+		while (parsed_char == OUT_REROUTE) {		// Out redirection
 			nextChar();
 			outputFile = getReroutes();
-			if (outputFile.length() == 0) {
-				System.out.println("Parser couldn't parse the standard output file reroute.");
-			}
 			consumeWhiteSpaces();
 		}
 	}
 
+	/**
+	 * Get single command.
+	 *
+	 * @return list of parts of command
+	 */
 	private ArrayList<String> getCommand() {
 		ArrayList<String> result = new ArrayList<String>();
 		boolean insideQuotes = false;
@@ -106,6 +109,11 @@ public class Parser {
 		return result;
 	}
 
+	/**
+	 * Get I/O redirection.
+	 *
+	 * @return
+	 */
 	private String getReroutes() {
 		String result = "";
 		consumeWhiteSpaces();
@@ -129,12 +137,18 @@ public class Parser {
 		return result.replaceAll("\"", "");
 	}
 
+	/**
+	 * Consumes whitespaces.
+	 */
 	private void consumeWhiteSpaces() {
 		while (!isFinished && Character.isWhitespace(parsed_char)) {
 			nextChar();
 		}
 	}
 
+	/**
+	 * Gets next character.
+	 */
 	private void nextChar() {
 		if (parsed_position + 1 == parsed_string.length()) {
 			parsed_char = '\0';
@@ -145,6 +159,7 @@ public class Parser {
 		}
 	}
 
+	/** Getters and setters */
 	public String getInputFile() {
 		return inputFile;
 	}

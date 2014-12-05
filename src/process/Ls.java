@@ -24,7 +24,7 @@ public class Ls extends AbstractProcess {
      * @param commands list of commands
      * @param shell parent shell
      */
-    public Ls(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell) {
+    public Ls(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell) throws IOException {
         super(pid, parentPid, input, commands, shell);
         this.path = "";
         helpOnly = false;
@@ -40,7 +40,7 @@ public class Ls extends AbstractProcess {
      * @param shell parent shell
      * @param path desired path
      */
-    public Ls(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell, String path) {
+    public Ls(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell, String path) throws IOException {
         super(pid, parentPid, input, commands, shell);
         if(path.equalsIgnoreCase(AbstractProcess.HELP_COMMAND)){
             helpOnly = true;
@@ -56,13 +56,13 @@ public class Ls extends AbstractProcess {
      */
     @Override
     protected void processRun() {
-        if(helpOnly){
+        if(helpOnly) {
             try{
                 output.write(getMan().getBytes());
                 output.close();
                 return;
             } catch (IOException e){
-                return;
+                return;                     // Killed process
             }
         }
         try {
@@ -76,7 +76,7 @@ public class Ls extends AbstractProcess {
             for(String file : files) output.write((file + "\t").getBytes());
             output.close();
         } catch (IOException e) {
-            return;
+            return;                         // Killed process
         }
     }
 

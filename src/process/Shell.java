@@ -16,9 +16,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO: Man page
-// TODO: Builtin commands man page
-
 /**
  * Shell is a user interface for access to an operating system's services.
  *
@@ -57,16 +54,14 @@ public class Shell extends AbstractProcess {
 	 * @param commands list of commands,
 	 * @param shell parent shell
 	 */
-	public Shell (int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell){
+	public Shell (int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell) throws IOException {
 		super(pid, parentPid, input, commands, shell);
-		try {
-			this.shell = this;                                    	// Shell to be forwarded
-			this.running = true;
-			this.root = new File(PATH_PREFIX).getCanonicalPath();
-			this.path = this.root;
-			if (commands.size() > 0) processInit();					// Normal process
-			else consoleInit();										// Console
-		} catch (IOException e) {}
+		this.shell = this;                                        // Shell to be forwarded
+		this.running = true;
+		this.root = new File(PATH_PREFIX).getCanonicalPath();
+		this.path = this.root;
+		if (commands.size() > 0) processInit();                    // Normal process
+		else consoleInit();										// Console
 	}
 
 	/**
@@ -111,7 +106,7 @@ public class Shell extends AbstractProcess {
 				}
 			}
 		} catch (IOException e) {
-			return;
+			return;													// Process killed
 		}
 	}
 
@@ -177,7 +172,7 @@ public class Shell extends AbstractProcess {
 					output.write(text.getBytes());
 					output.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					return;					// Killed process
 				}
 			}
 		});
@@ -185,7 +180,7 @@ public class Shell extends AbstractProcess {
 		try {
 			t.join();
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			return;				// Thread interrupted -> just finish
 		}
 	}
 
@@ -203,7 +198,7 @@ public class Shell extends AbstractProcess {
 				else pipeOutput();
 			}
 		} catch (IOException e) {
-			console.printResults("");
+			console.printResults("");				// Killed process
 		}
 	}
 
@@ -278,7 +273,7 @@ public class Shell extends AbstractProcess {
 		try {
 			consoleInput = new BBPipedInputStream(output);
 		} catch (IOException e) {
-			return;
+			return;					// Killed process
 		}
 	}
 
@@ -317,9 +312,8 @@ public class Shell extends AbstractProcess {
 			if(!file.matches("^" + root.replaceAll("\\\\", "\\\\\\\\") + ".*")) return null;			// Checking borders - REGEX Windows hack :D
 			return file;
 		} catch (IOException e) {
-			e.printStackTrace();
+			return null;		// Not found etc.
 		}
-		return null;			// Out of virtual filesystem.
 	}
 
 	/**
@@ -364,7 +358,7 @@ public class Shell extends AbstractProcess {
 				}
 			}
 		} catch (IOException e) {
-			return;
+			return;								// Killed process
 		}
 	}
 
@@ -444,13 +438,13 @@ public class Shell extends AbstractProcess {
 		try {
 			printError((String) Class.forName(Kernel.PACKAGE + "." + process.substring(0, 1).toUpperCase() + process.substring(1).toLowerCase()).getMethod("getMan").invoke(null, null));
 		} catch (IllegalAccessException e) {
-			e.printStackTrace();
+			printError("Bad usage! No manual entry for " + process + ".");
 		} catch (InvocationTargetException e) {
-			e.printStackTrace();
+			printError("Bad usage! No manual entry for " + process + ".");
 		} catch (NoSuchMethodException e) {
 			printError("Bad usage! No manual entry for " + process + ".");
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			return;					// Getting for known class.
 		}
 	}
 

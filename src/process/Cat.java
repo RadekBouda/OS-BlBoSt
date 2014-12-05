@@ -25,7 +25,7 @@ public class Cat extends AbstractProcess {
      * @param shell parent shell
      * @param path Path to file
      */
-    public Cat(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell, String path) {
+    public Cat(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell, String path) throws IOException {
         super(pid, parentPid, input, commands, shell);
 
         if(path.equalsIgnoreCase(AbstractProcess.HELP_COMMAND)){
@@ -47,7 +47,7 @@ public class Cat extends AbstractProcess {
      * @param commands List of commands
      * @param shell parent shell
      */
-    public Cat(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell) {
+    public Cat(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell) throws IOException {
         super(pid, parentPid, input, commands, shell);
         this.path = null;
     }
@@ -63,7 +63,7 @@ public class Cat extends AbstractProcess {
                 output.close();
                 return;
             } catch (IOException e){
-                return;
+                return;                 // Killed process
             }
         }
         if(path == null) {
@@ -82,7 +82,7 @@ public class Cat extends AbstractProcess {
             output.write(text.getBytes());
             output.close();
         } catch (IOException e) {
-            return;
+            return;                     // Killed process
         }
     }
 
@@ -100,10 +100,10 @@ public class Cat extends AbstractProcess {
                 shell.printError("cat: " + path + ": No such a file or directory");
                 output.close();
             } catch (IOException e1) {
-                return;
+                return;                 // Killed process
             }
         } catch (IOException e) {
-            return;
+            return;                     // Killed process
         }
     }
 
@@ -116,7 +116,7 @@ public class Cat extends AbstractProcess {
             while((line = shell.getLine()) != null) output.write((line + "\n").getBytes());
             output.close();
         } catch (IOException e) {
-            return;
+            return;                     // Killed process
         }
     }
     

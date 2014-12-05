@@ -6,7 +6,10 @@ import kernel.Kernel;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Ps process serves as observer of processes in OS.
@@ -24,7 +27,7 @@ public class Ps extends AbstractProcess {
      * @param commands list of commands
      * @param shell parent shell
      */
-    public Ps(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell) {
+    public Ps(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell) throws IOException {
         super(pid, parentPid, input, commands, shell);
     }
 
@@ -42,7 +45,7 @@ public class Ps extends AbstractProcess {
             }
             output.close();
         } catch (IOException e) {
-            return;
+            return;                                     // Killed process
         }
     }
 

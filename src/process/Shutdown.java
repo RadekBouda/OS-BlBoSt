@@ -3,6 +3,7 @@ package process;
 import helpers.BBPipedInputStream;
 import kernel.Kernel;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -21,7 +22,7 @@ public class Shutdown extends AbstractProcess {
      * @param commands List of commands
      * @param shell parent shell
      */
-    public Shutdown(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell) {
+    public Shutdown(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell) throws IOException {
         super(pid, parentPid, input, commands, shell);
     }
 

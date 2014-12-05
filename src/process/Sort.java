@@ -22,7 +22,7 @@ public class Sort extends AbstractProcess {
      * @param commands list with commands
      * @param shell parent shell
      */
-    public Sort(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell) {
+    public Sort(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell) throws IOException {
         super(pid, parentPid, input, commands, shell);
     }
 
@@ -57,7 +57,7 @@ public class Sort extends AbstractProcess {
             }
             output.close();
         } catch (IOException e) {
-            return;
+            return;             // Killed process
         }
     }
 
@@ -82,7 +82,7 @@ public class Sort extends AbstractProcess {
             }
             output.close();
         } catch (IOException e) {
-            return;
+            return;             // Killed process
         }
     }
 

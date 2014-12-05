@@ -23,7 +23,7 @@ public class Kill extends AbstractProcess {
      * @param commands list of commands
      * @param shell parent shell
      */
-    public Kill(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell, String pidToKill) {
+    public Kill(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell, String pidToKill) throws IOException {
         super(pid, parentPid, input, commands, shell);
         if(pidToKill.equalsIgnoreCase(AbstractProcess.HELP_COMMAND)){
             helpOnly = true;
@@ -45,7 +45,7 @@ public class Kill extends AbstractProcess {
                 output.close();
                 return;
             } catch (IOException e){
-                return;
+                return;                     // Killed process
             }
         }
         try {
@@ -64,7 +64,7 @@ public class Kill extends AbstractProcess {
                 output.close();
             }
         } catch (IOException e) {
-            return;
+            return;                         // Killed process
         }
     }
     

@@ -23,7 +23,7 @@ public class Grep extends AbstractProcess {
      * @param commands  list with commands
      * @param shell     parent shell
      */
-    public Grep(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell, String grep) {
+    public Grep(int pid, int parentPid, BBPipedInputStream input, List<List<String>> commands, Shell shell, String grep) throws IOException {
         super(pid, parentPid, input, commands, shell);
         if (grep.equalsIgnoreCase(AbstractProcess.HELP_COMMAND)) {
             helpOnly = true;
@@ -44,7 +44,7 @@ public class Grep extends AbstractProcess {
                 output.close();
                 return;
             } catch (IOException e) {
-                return;
+                return;                                 // Killed process
             }
         }
 
@@ -64,7 +64,7 @@ public class Grep extends AbstractProcess {
             }
             output.close();
         } catch (IOException e) {
-            return;
+            return;                                     // Killed process
         }
     }
 

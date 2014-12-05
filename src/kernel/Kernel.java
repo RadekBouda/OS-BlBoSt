@@ -109,19 +109,18 @@ public class Kernel {
 			processes.put(proc.getPid(), proc);							// Adds to the process table
 			return proc.getPid();										// Returns the process
 		} catch (ClassNotFoundException e) {
-			return -1;
+			return -1;					// Process not found
 		} catch (InvocationTargetException e) {
-			e.printStackTrace();
+			return -2;					// Invocation error -> wrong usage
 		} catch (NoSuchMethodException e) {
-			return -2;
+			return -2;					// Wrong arguments
 		} catch (InstantiationException e) {
-			e.printStackTrace();
+			return -1;					// Can't be instance f.e. AbstractProcess -> Not found error
 		} catch (IllegalAccessException e) {
-			e.printStackTrace();
+			return -1;					// Do not have accesss -> Not found error
 		} catch (NoClassDefFoundError e) {
-			return -1;
+			return -1;					// Not found error
 		}
-		return -3;
 	}
 
 	/**
