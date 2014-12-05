@@ -69,7 +69,8 @@ public class Man extends AbstractProcess{
 
         try {
             if (manPage == null || manPage.equals("")) {
-                output.write("Default shell man".getBytes());
+                output.write("Default shell man\n".getBytes());
+                output.write(listOfProcesses().getBytes());
                 output.close();
                 return;
             }
@@ -111,9 +112,30 @@ public class Man extends AbstractProcess{
      * @return Manual page
      */
     public static String getMan(){
-        return "------------------ MAN PROCESS ------------------\n"+
+        return "----------------- MAN PROCESS ------------------\n"+
                 "- shows a manual page for selected process\n\n"+
                 "Syntax: man <process_name>\n"+
                 "------------------ MANUAL END ------------------";
+    }
+
+    private String listOfProcesses() {
+        return "---------- LIST OF IMPLEMENTED COMMANDS---------\n" +
+                "cat - print files\n" +
+                "grep - print lines containing a pattern\n" +
+                "kill - terminate a process\n" +
+                "ls - list directory contents\n" +
+                "man - display manual pages\n" +
+                "ps - list processes\n" +
+                "shell - recursive shell\n" +
+                "shutdown - close down the system\n" +
+                "sort - sort lines of text files\n" +
+                "wc - count lines\n" +
+                "------------------ END OF LIST -------------------\n" +
+                "---------- LIST OF BUILTIN SHELL COMMANDS --------\n" +
+                "cd - change directory\n" +
+                "echo - write arguments to the standard output\n" +
+                "exit - close current shell\n" +
+                "pwd - print working directory\n" +
+                "------------------ END OF LIST -------------------\n";
     }
 }

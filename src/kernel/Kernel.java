@@ -118,6 +118,8 @@ public class Kernel {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
+		} catch (NoClassDefFoundError e) {
+			return -1;
 		}
 		return -3;
 	}

@@ -138,20 +138,21 @@ public class Shell extends AbstractProcess {
 	 * @return true/false
 	 */
 	public boolean builtinCommand(List<String> command, BBPipedInputStream input) {
-		if(command.get(0).equals("cd")) {
+		String first = command.get(0).toLowerCase();
+		if(first.equals("cd")) {
 			if(command.size() < 2) cd("");
 			else cd(command.get(1));
 			return true;
 		}
-		if(command.get(0).equals("pwd")) {
+		if(first.equals("pwd")) {
 			pwd(input);
 			return true;
 		}
-		if(command.get(0).equals("exit")) {
+		if(first.equals("exit")) {
 			exit();
 			return true;
 		}
-		if(command.get(0).equals("echo")) {
+		if(first.equals("echo")) {
 			echo(command, input);
 			return true;
 		}
