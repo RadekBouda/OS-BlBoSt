@@ -10,7 +10,8 @@ import java.util.List;
 
 /**
  * This class represents a process which is generating manual pages.
- * @author Radek Bouda
+ *
+ * @author Radek Bouda, David Steinberger
  * @version 1.0.0
  */
 public class Man extends AbstractProcess{
@@ -34,7 +35,6 @@ public class Man extends AbstractProcess{
             helpOnly = false;
             this.manPage = manPage;
         }
-
     }
 
     /**
@@ -57,26 +57,14 @@ public class Man extends AbstractProcess{
      */
     @Override
     protected void processRun() {
-        if(helpOnly){
-            try{
-                output.write(getMan().getBytes());
-                output.close();
-                return;
-            } catch (IOException e){
-                return;
-            }
-        }
-
         try {
-            if (manPage == null || manPage.equals("")) {
-                output.write("Default shell man\n".getBytes());
-                output.write(listOfProcesses().getBytes());
-                output.close();
-                return;
+            if(helpOnly){
+                printOwnHelp();
+            } else if(manPage == null || manPage.equals("")) {
+                noArgsVersion();
+            } else if(!builtInVersion()) {
+                classicProcessVersion();
             }
-            Method man = Class.forName(Kernel.PACKAGE + "." + manPage.substring(0, 1).toUpperCase() + manPage.substring(1, manPage.length()).toLowerCase()).getDeclaredMethod("getMan");
-            output.write(man.invoke(null, null).toString().getBytes());
-            output.close();
         } catch (IOException e) {
             // error during IO with console, can't be printed to the console because the problem is communicating with a console
             return;
@@ -104,11 +92,62 @@ public class Man extends AbstractProcess{
         } catch (InvocationTargetException e) {
             e.printStackTrace(); // it will be very big surprise when this exception occur
         }
+    }
 
+    /**
+     * Classic version for basic process.
+     *
+     * @throws ClassNotFoundException
+     * @throws IOException
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     * @throws NoSuchMethodException
+     */
+    private void classicProcessVersion() throws ClassNotFoundException, IOException, InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+        Method man = Class.forName(Kernel.PACKAGE + "." + manPage.substring(0, 1).toUpperCase() + manPage.substring(1, manPage.length()).toLowerCase()).getDeclaredMethod("getMan");
+        output.write(man.invoke(null, null).toString().getBytes());
+        output.close();
+    }
+
+    /**
+     * Version for builtin commands.
+     *
+     * @return true/false
+     * @throws IOException
+     */
+    private boolean builtInVersion() throws IOException {
+        if(manPage.equals("cd") || manPage.equals("echo") || manPage.equals("exit") || manPage.equals("pwd") || manPage.equals("builtin") || manPage.equals("builtins")) {
+            output.write(builtinMan().getBytes());
+            output.close();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Version for no arguments.
+     *
+     * @throws IOException
+     */
+    private void noArgsVersion() throws IOException {
+        output.write("Default shell man\n".getBytes());
+        output.write(listOfProcesses().getBytes());
+        output.close();
+    }
+
+    /**
+     * Version for its own help.
+     *
+     * @throws IOException
+     */
+    private void printOwnHelp() throws IOException {
+        output.write(getMan().getBytes());
+        output.close();
     }
 
     /**
      * Returns a manual page of a process.
+     *
      * @return Manual page
      */
     public static String getMan(){
@@ -118,6 +157,25 @@ public class Man extends AbstractProcess{
                 "------------------ MANUAL END ------------------";
     }
 
+    /**
+     * Gets a manual page of builtin commands.
+     *
+     * @return Manual page
+     */
+    private String builtinMan() {
+        return "---------------- MAN BUILTINS ------------------\n" +
+                "cd - change directory\n usage: cd <relative/absolute path>\n\n" +
+                "echo - write arguments to the standard output\n usage: echo <args>\n\n" +
+                "exit - close current shell\n usage: exit\n\n" +
+                "pwd - print working directory\n usage: pwd \n\n" +
+                "---------------- MANUAL END -------------------\n";
+    }
+
+    /**
+     * Gets list of implemented methods.
+     *
+     * @return list
+     */
     private String listOfProcesses() {
         return "---------- LIST OF IMPLEMENTED COMMANDS---------\n" +
                 "cat - print files\n" +
