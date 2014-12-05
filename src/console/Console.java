@@ -41,7 +41,7 @@ public class Console extends JTextPane {
         this.setCaretColor(new Color(255, 255, 51));
         this.addKeyListener(new CommandsKeyListener());
         this.setText("");
-        this.setCaretPosition(this.getText().length());
+        this.setCaretPosition(this.getDocument().getLength());
         this.output = new PipedOutputStream();
         this.shell = shell;
         this.shell.setConsoleInput(output);
@@ -67,7 +67,7 @@ public class Console extends JTextPane {
         String currentText = this.getText();
         if(currentText.charAt(currentText.length() - 1) != '\n') this.setText(currentText + "\n" + text);
         else this.setText(currentText + text);
-        setCaretPosition(getText().length());
+        setCaretPosition(this.getDocument().getLength());
     }
 
     /**
@@ -87,7 +87,7 @@ public class Console extends JTextPane {
      */
     public void startConsole(String text) {
         this.setText(text);
-        setCaretPosition(getText().length());
+        setCaretPosition(getDocument().getLength());
     }
 
     /**
@@ -121,7 +121,7 @@ public class Console extends JTextPane {
     private boolean isCaretWhereItShouldBe() {
         String split[] = getText().split("\n");
         int lastRowLength = split[split.length - 1].length();
-        int totalLength = getText().length();
+        int totalLength = getDocument().getLength();
 
         if (getCaretPosition() < totalLength - lastRowLength + shell.getConsolePrefix().length()) {
             return false;
@@ -152,7 +152,7 @@ public class Console extends JTextPane {
         @Override
         public void keyPressed(KeyEvent e) {
                 if (!isCaretWhereItShouldBe()) { // if caret is somewhere where it should not be
-                    setCaretPosition(getText().length()); // we put it somewhere where it should be
+                    setCaretPosition(getDocument().getLength()); // we put it somewhere where it should be
                 }
 
                 //Disable deleting with a back space and moving of a caret in front of the hashmark

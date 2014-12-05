@@ -120,9 +120,9 @@ public class Shell extends AbstractProcess {
 		this.input = new PipedInputStream(PIPE_BUFFER_SIZE);
 		redirectInput(parser.getInputFile());
 		runningProcess = callSubProcess();
-		String output = getStringFromInput();
-		if(!running) return;												// Self killing check
-		redirectOutput(parser.getOutputFile(), output);
+		if(!running) return; 												// Self killing check
+		printOutput(parser.getOutputFile());
+		if(!running) return; 												// Self killing check
 		if(!process) console.setInCommand(false);							// Console outside command
 	}
 
@@ -186,23 +186,64 @@ public class Shell extends AbstractProcess {
 	 * Redirects output.
 	 *
 	 * @param output file
-	 * @param txt content
 	 */
-	private void redirectOutput(String output, String txt) {
-		if(txt == null) txt = "";                                           // If output is null (error appears etc.), print just new line with shell prefix.
+	private void printOutput(String output) {
 		try {
-			if (output != null) {											// Output to file
-				BufferedWriter bfw = new BufferedWriter(new FileWriter(new File(getPath(output))));
-				bfw.write(txt);
-				bfw.close();
-				if (!process) console.printResults("");						// Print new line in console.
-			} else {
-				if (!process) console.printResults(txt);					// Print to console
-				else this.output.write((txt + "\n").getBytes());			// Output to parent shell.
+			if (output != null) fileOutput(output);
+			else {
+				if (!process) consoleOutput();
+				else pipeOutput();
 			}
 		} catch (IOException e) {
 			return;
 		}
+	}
+
+	/**
+	 * Print output into a file.
+	 *
+	 * @param output file
+	 * @throws IOException
+	 */
+	private void fileOutput(String output) throws IOException {
+		BufferedWriter bfw = new BufferedWriter(new FileWriter(new File(getPath(output))));
+		String txt = getStringFromInput();
+		if(!running) return;										// Self killing check
+		bfw.write(txt);
+		bfw.close();
+		if (!process) console.printResults("");						// Print new line in console.
+	}
+
+	/**
+	 * Print output into the console.
+	 *
+	 * @throws IOException
+	 */
+	private void consoleOutput() throws IOException {
+		while(running) {
+			int c = input.read();
+			StringBuilder builder = new StringBuilder();
+			while (c != -1 && c != '\n') {
+				builder.append((char) c);
+				c = input.read();
+			}
+			if (c == '\n') console.printNewLine(builder.toString() + "\n");
+			if (c == -1) {
+				console.printResults(builder.toString());
+				break;
+			}
+		}
+	}
+
+	/**
+	 * Print output into output pipe.
+	 *
+	 * @throws IOException
+	 */
+	private void pipeOutput() throws IOException {
+		String txt = getStringFromInput() + "\n";
+		if(!running) return;										// Self killing check
+		this.output.write(txt.getBytes());			// Output to parent shell.
 	}
 
 	/**

@@ -29,10 +29,48 @@ public class Cat extends AbstractProcess {
     }
 
     /**
+     * Create new process. Version without parameters. Copy stdin on output.
+     *
+     * @param pid Process ID
+     * @param parentPid process id of parent
+     * @param input PipedInputStream
+     * @param commands List of commands
+     * @param shell parent shell
+     */
+    public Cat(int pid, int parentPid, PipedInputStream input, List<List<String>> commands, Shell shell) {
+        super(pid, parentPid, input, commands, shell);
+        this.path = null;
+    }
+
+    /**
      * Own job.
      */
     @Override
     protected void processRun() {
+        if(path == null) {
+            if(hasPipedInput()) pipedVersion();
+            else stdinVersion();
+        }
+        else argumentVersion();
+    }
+
+    /**
+     * Version with piped input.
+     */
+    private void pipedVersion() {
+        try {
+            String text = getStringFromInput();
+            output.write(text.getBytes());
+            output.close();
+        } catch (IOException e) {
+            return;
+        }
+    }
+
+    /**
+     * Version with arguments.
+     */
+    private void argumentVersion() {
         try {
             int c;
             BufferedReader reader = new BufferedReader(new FileReader(new File(path)));
@@ -45,6 +83,19 @@ public class Cat extends AbstractProcess {
             } catch (IOException e1) {
                 return;
             }
+        } catch (IOException e) {
+            return;
+        }
+    }
+
+    /**
+     * Version without arguments. Stdin.
+     */
+    private void stdinVersion() {
+        try {
+            String line;
+            while((line = shell.getLine()) != null) output.write((line + "\n").getBytes());
+            output.close();
         } catch (IOException e) {
             return;
         }
