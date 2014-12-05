@@ -5,6 +5,7 @@
 package kernel;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Main class of the simulator.
@@ -26,7 +27,11 @@ public class Run {
             PATH_SEPARATOR = "/";           // Unix-like
         }
 
-        Kernel.getInstance().runShell();
+        try {
+            Kernel.getInstance().runShell();
+        } catch (IOException e) {
+            return; // Failed to start or something important killed.
+        }
     }
 
     /**

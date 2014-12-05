@@ -3,6 +3,7 @@ package process;
 import helpers.BBPipedInputStream;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -38,34 +39,71 @@ public class Grep extends AbstractProcess {
      */
     @Override
     protected void processRun() {
-        if (helpOnly || !hasPipedInput()) {
-            try {
-                output.write(getMan().getBytes());
-                output.close();
-                return;
-            } catch (IOException e) {
-                return;                                 // Killed process
-            }
-        }
-
-
         try {
-            String text = getStringFromInput();
-            if (text == null || text.equals("")) {
-                output.write("\n".getBytes());
-            } else {
-                String[] lines = text.split("\n");
-                for (String line : lines) {
-                    if (line.contains(stringToGrep)) {
-                        output.write(line.getBytes());
-                        output.write("\n".getBytes());
-                    }
+            if (helpOnly) helpOnly();
+            else {
+                if (hasPipedInput()) pipeVersion();
+                else stdinVersion();
+            }
+        } catch (IOException e) {
+            return;                                 // Killed process
+        }
+    }
+
+    /**
+     * Prints help.
+     *
+     * @throws IOException
+     */
+    private void helpOnly() throws IOException {
+        output.write(getMan().getBytes());
+        output.close();
+        return;
+    }
+
+    /**
+     * Piped version.
+     *
+     * @throws IOException
+     */
+    private void pipeVersion() throws IOException {
+        String text = getStringFromInput();
+        if (text == null || text.equals("")) {
+            output.write("\n".getBytes());
+        } else {
+            String[] lines = text.split("\n");
+            for (String line : lines) {
+                if (line.contains(stringToGrep)) {
+                    output.write(line.getBytes());
+                    output.write("\n".getBytes());
                 }
             }
-            output.close();
-        } catch (IOException e) {
-            return;                                     // Killed process
         }
+        output.close();
+    }
+
+    /**
+     * Stdin version.
+     *
+     * @throws IOException
+     */
+    private void stdinVersion() throws IOException {
+        ArrayList<String> lines = new ArrayList<String>();
+        String currentLine = "";
+
+        while ((currentLine = shell.getLine()) != null) {
+            lines.add(currentLine);
+        }
+
+        String[] linesField = new String[lines.size()];
+        lines.toArray(linesField);
+        for (String line : linesField) {
+            if (line.contains(stringToGrep)) {
+                output.write(line.getBytes());
+                output.write("\n".getBytes());
+            }
+        }
+        output.close();
     }
 
 

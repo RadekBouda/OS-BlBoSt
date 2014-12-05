@@ -9,6 +9,7 @@ import process.AbstractProcess;
 import process.Shell;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -65,7 +66,7 @@ public class Kernel {
 	/**
 	 * Runs main shell.
 	 */
-	public void runShell() {
+	public void runShell() throws IOException {
 		AbstractProcess shell = new Shell(PID, 0, null, new ArrayList<List<String>>(), null);
 		increasePID();
 		processes.put(shell.getPid(), shell);
