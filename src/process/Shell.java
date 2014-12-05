@@ -43,8 +43,10 @@ public class Shell extends AbstractProcess {
 	/** PID of current running process */
 	private int runningProcess;
 
+	/** Virtual filesystem directory name */
+	private static final String FILESYSTEM_DIR_NAME = "filesystem";
 	/** Virtual filesystem location */
-	private static final String PATH_PREFIX = "filesystem" + File.separatorChar;
+	private static final String PATH_PREFIX = FILESYSTEM_DIR_NAME + File.separatorChar;
 
 	/**
 	 * Create new shell with own window.
@@ -412,7 +414,8 @@ public class Shell extends AbstractProcess {
 	 */
 	public String getConsolePrefix() {
 		String parts[] = path.split(Run.getPathSeparatorForSplit());
-		return "BBShell:" + parts[parts.length-1] + " root$ ";
+		String current = parts[parts.length-1].equals(FILESYSTEM_DIR_NAME) ? "/":parts[parts.length-1];
+		return "BBShell:" + current + " root$ ";
 	}
         
 	/**
