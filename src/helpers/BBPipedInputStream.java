@@ -4,7 +4,11 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Created by Radek on 5. 12. 2014.
+ * @author Radek Bouda (originally James Gosling)
+ * This class is used to realize pipes which are used to communicate between processes.
+ * This class is actually a copy of PipedInputStream created by James Gosling.
+ * Only difference is, that BBPipedInputStream uses 10ms wait on calling read().
+ * Original PipedInputStream uses 1000ms wait, what is way too long.
  */
 public class BBPipedInputStream extends InputStream {
 

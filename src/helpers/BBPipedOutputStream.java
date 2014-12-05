@@ -4,7 +4,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * Created by Radek on 5. 12. 2014.
+ * @author Radek Bouda (originally James Gosling)
+ * This class is used to realize pipes which are used to communicate between processes.
+ * This class is actually a copy of PipedOutputStream created by James Gosling.
+ * We had to create this class, because we use BBPipedInputStream.
  */
 public class BBPipedOutputStream extends OutputStream {
     /* REMIND: identification of the read and write sides needs to be
