@@ -191,6 +191,7 @@ public class Kernel {
 	 */
 	public void killProcessAndParents(int pid) {
 		AbstractProcess process = processes.get(pid);
+		if(process == null) return;                             // Already dead
 		while(!(process instanceof Shell)) {					// Doesn't kill shell
 			killProcess(process.getPid());
 			process = processes.get(process.getParentPid());

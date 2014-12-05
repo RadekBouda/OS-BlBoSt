@@ -195,7 +195,7 @@ public class Shell extends AbstractProcess {
 				else pipeOutput();
 			}
 		} catch (IOException e) {
-			return;
+			console.printResults("");
 		}
 	}
 
