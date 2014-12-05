@@ -230,6 +230,7 @@ public class Console extends JTextPane {
                 } catch (IOException e1) {
                     e1.printStackTrace();
                 }
+                setCaretPosition(this.getDocument().getLength());
                 break;
             //Printing previous command
             case KeyEvent.VK_UP:
