@@ -114,6 +114,8 @@ public class Grep extends AbstractProcess {
      */
     public static String getMan() {
         return "------------------ GREP PROCESS ------------------\n" +
+                "- gets lines from standard input and prints those which contain string\n\n" +
+                "Example: grep <str>\n" +
                 "- gets lines from pipe and prints those which contain string\n\n" +
                 "Example: cat \"file\" | grep <str>\n" +
                 "- prints lines containing <str> from content of the selected file (rel/abs path) to the standard output\n\n" +
