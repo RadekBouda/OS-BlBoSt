@@ -171,11 +171,11 @@ public abstract class AbstractProcess extends Thread {
 			int c;
 			StringBuilder builder = new StringBuilder();
 			while ((c = input.read()) != -1) {
-				if(c != '\r'){ builder.append((char) c);}
+				builder.append((char) c);
 			}
 			return builder.toString();
 		} catch (IOException e) {
-			return null;
+			return ""; // If output is null (error appears etc.), print just new line with shell prefix.
 		}
 	}
 
