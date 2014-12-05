@@ -64,11 +64,15 @@ public class Console extends JTextPane {
      * Method which prints data to console, on a new line.
      * @param text Text to be printed on a new line.
      */
-    public void printNewLine(String text){
-        String currentText = this.getText();
-        if(currentText.charAt(currentText.length() - 1) != '\n') this.setText(currentText + "\n" + text);
-        else this.setText(currentText + text);
-        setCaretPosition(this.getDocument().getLength());
+    public void printNewLine(String text) {
+        try {
+            String currentText = this.getText();
+            if (currentText.charAt(currentText.length() - 1) != '\n') this.setText(currentText + "\n" + text);
+            else this.setText(currentText + text);
+            setCaretPosition(this.getDocument().getLength());
+        } catch (Error e) {
+            return;                 // Kill while writing
+        }
     }
 
     /**
