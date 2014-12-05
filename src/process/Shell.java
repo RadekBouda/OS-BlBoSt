@@ -401,13 +401,13 @@ public class Shell extends AbstractProcess {
 	 * @return Manual page
 	 */
 	public static String getMan(){
-            return "------------------ BASH PROCESS ------------------\n"+
-            "- bash - GNU Bourne-Again SHell\n"+
-            "- bash is an sh-compatible command language interpreter that executes\n" +
-            "  commands read from the standard input or from a file.\n\n"+
+            return "------------------ SHELL PROCESS ------------------\n"+
+            "BBShell:\n"+
+            "- command language interpreter that executes commands read\n" +
+            "  from the standard input or from a file.\n\n"+
             "Syntax: shell\n"+
             "- starts new shell process\n\n"+
-            "Syntax: <command> {<argument>} {´|´ <command> {<argument>}} <input> <output>\n"+
+            "Syntax: <command> {<argument>} { ' | ' <command> {<argument>}} < ' < ' input> < ' > ' output>\n"+
             "- execute given command. Element in {} braces are not mandatory.\n"+
             "  If <input> and <output> elements are not specified, standart input and output will be used.\n"+
             "------------------ MANUAL END ------------------";
