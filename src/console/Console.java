@@ -3,6 +3,7 @@ package console;
 import process.Shell;
 
 import javax.swing.*;
+import javax.swing.text.BadLocationException;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -157,13 +158,18 @@ public class Console extends JTextPane {
 
                 //Disable deleting with a back space and moving of a caret in front of the hashmark
                 if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE || e.getKeyCode() == KeyEvent.VK_LEFT) {
-                    if (getText().toCharArray()[getCaretPosition() - 1] == ' ' && getText().toCharArray()[getCaretPosition() - 2] == '$') {
-                        e.consume();
+                    try {
+                        String text = getDocument().getText(0, getDocument().getLength());
+                        if (text.charAt(text.length() - 1) == ' ' && text.charAt(text.length() - 2) == '$') {
+                            e.consume();
+                        }
+                        if(text.charAt(text.length() - 1) == '\n'){
+                            e.consume();
+                        }
+                        return;
+                    } catch (BadLocationException e1) {
+                        e1.printStackTrace();
                     }
-                    if(getText().toCharArray()[getCaretPosition() - 1] == '\n'){
-                        e.consume();
-                    }
-                    return;
                 }
             // Check console state
             if(!inCommand) outsideCommandBehaviour(e);
