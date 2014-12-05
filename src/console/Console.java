@@ -168,7 +168,7 @@ public class Console extends JTextPane {
                         }
                         return;
                     } catch (BadLocationException e1) {
-                        return;
+                        e1.printStackTrace();
                     }
                 }
             // Check console state
