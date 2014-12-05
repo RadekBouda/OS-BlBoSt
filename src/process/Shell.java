@@ -8,7 +8,10 @@ import helpers.Parser;
 import kernel.Kernel;
 import kernel.Run;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
@@ -136,8 +139,8 @@ public class Shell extends AbstractProcess {
 	 */
 	public boolean builtinCommand(List<String> command, BBPipedInputStream input) {
 		if(command.get(0).equals("cd")) {
-			if(command.size() < 2) return true;
-			cd(command.get(1));
+			if(command.size() < 2) cd("");
+			else cd(command.get(1));
 			return true;
 		}
 		if(command.get(0).equals("pwd")) {
@@ -317,6 +320,17 @@ public class Shell extends AbstractProcess {
 	}
 
 	/**
+	 * Returns printable path in virtual environment. Removes absolute prefix of real filesystem.
+	 *
+	 * @param path whole path
+	 * @return virtual path
+	 */
+	public String getPrintablePath(String path) {
+		path = path.replaceFirst("^" + root.replaceAll("\\\\", "\\\\\\\\"), "");
+		return path.equals("") ? "/":path;
+	}
+
+	/**
 	 * Sets current path.
 	 *
 	 * @param path current path
@@ -362,9 +376,11 @@ public class Shell extends AbstractProcess {
 
 	/**
 	 * Prints current path.
+	 *
+	 * @param input input pipe
 	 */
 	private void pwd(BBPipedInputStream input) {
-		printIntoInputPipe(getPath(""), input);
+		printIntoInputPipe(getPrintablePath(getPath("")), input);
 	}
 
 	/**
