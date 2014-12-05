@@ -2,6 +2,8 @@ package process;
 
 import console.Console;
 import console.ConsoleWindow;
+import helpers.BBInputStream;
+import helpers.BBOutputStream;
 import helpers.Parser;
 import kernel.Kernel;
 import kernel.Run;
@@ -26,7 +28,7 @@ public class Shell extends AbstractProcess {
 	/** Console */
 	private Console console;
 	/** Console input pipe */
-	private PipedInputStream consoleInput;
+	private BBInputStream consoleInput;
 	/** Current path */
 	private String path;
 	/** Root path */
@@ -50,7 +52,7 @@ public class Shell extends AbstractProcess {
 	 * @param commands list of commands,
 	 * @param shell parent shell
 	 */
-	public Shell (int pid, int parentPid, PipedInputStream input, List<List<String>> commands, Shell shell){
+	public Shell (int pid, int parentPid, BBInputStream input, List<List<String>> commands, Shell shell){
 		super(pid, parentPid, input, commands, shell);
 		try {
 			this.shell = this;                                    	// Shell to be forwarded
@@ -66,7 +68,7 @@ public class Shell extends AbstractProcess {
 	 * Initialization for basic process. Blocking parent shell.
 	 */
 	private void processInit() {
-		this.consoleInput = (PipedInputStream) this.input;			// Read commands from previous process
+		this.consoleInput = (BBInputStream) this.input;			// Read commands from previous process
 		this.process = true;										// Set process flag
 	}
 
@@ -117,7 +119,7 @@ public class Shell extends AbstractProcess {
 		if(!process) console.setInCommand(true);							// Console inside command
 		Parser parser = new Parser(line);   								// Parses the line
 		commands = parser.getAllCommands();
-		this.input = new PipedInputStream(PIPE_BUFFER_SIZE);
+		this.input = new BBInputStream(PIPE_BUFFER_SIZE);
 		redirectInput(parser.getInputFile());
 		runningProcess = callSubProcess();
 		if(!running) return; 												// Self killing check
@@ -132,7 +134,7 @@ public class Shell extends AbstractProcess {
 	 * @param command parsed commands
 	 * @return true/false
 	 */
-	public boolean builtinCommand(List<String> command, PipedInputStream input) {
+	public boolean builtinCommand(List<String> command, BBInputStream input) {
 		if(command.get(0).equals("cd")) {
 			if(command.size() < 2) return true;
 			cd(command.get(1));
@@ -160,12 +162,12 @@ public class Shell extends AbstractProcess {
 	 * @param text result
 	 * @param input input pipe
 	 */
-	private void printIntoInputPipe(final String text, final PipedInputStream input) {
+	private void printIntoInputPipe(final String text, final BBInputStream input) {
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
 				try {
-					PipedOutputStream output = new PipedOutputStream(input);
+					BBOutputStream output = new BBOutputStream(input);
 					output.write(text.getBytes());
 					output.close();
 				} catch (IOException e) {
@@ -266,9 +268,9 @@ public class Shell extends AbstractProcess {
 	 *
 	 * @param output console output
 	 */
-	public void setConsoleInput(PipedOutputStream output) {
+	public void setConsoleInput(BBOutputStream output) {
 		try {
-			consoleInput = new PipedInputStream(output);
+			consoleInput = new BBInputStream(output);
 		} catch (IOException e) {
 			return;
 		}
@@ -361,7 +363,7 @@ public class Shell extends AbstractProcess {
 	/**
 	 * Prints current path.
 	 */
-	private void pwd(PipedInputStream input) {
+	private void pwd(BBInputStream input) {
 		printIntoInputPipe(getPath(""), input);
 	}
 
@@ -371,7 +373,7 @@ public class Shell extends AbstractProcess {
 	 * @param arguments arguments
 	 * @param input piped input
 	 */
-	public void echo(List<String> arguments, PipedInputStream input) {
+	public void echo(List<String> arguments, BBInputStream input) {
 		String text = "";
 		if(arguments.size() == 1) text = "\n ";
 		else for(int i = 1; i < arguments.size(); i++) text += arguments.get(i) + " ";		// Separates by space

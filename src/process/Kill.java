@@ -1,5 +1,6 @@
 package process;
 
+import helpers.BBInputStream;
 import kernel.Kernel;
 
 import java.io.IOException;
@@ -23,7 +24,7 @@ public class Kill extends AbstractProcess {
      * @param commands list of commands
      * @param shell parent shell
      */
-    public Kill(int pid, int parentPid, PipedInputStream input, List<List<String>> commands, Shell shell, String pidToKill) {
+    public Kill(int pid, int parentPid, BBInputStream input, List<List<String>> commands, Shell shell, String pidToKill) {
         super(pid, parentPid, input, commands, shell);
         if(pidToKill.equalsIgnoreCase(AbstractProcess.HELP_COMMAND)){
             helpOnly = true;

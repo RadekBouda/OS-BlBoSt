@@ -4,6 +4,7 @@
  */
 package kernel;
 
+import helpers.BBInputStream;
 import process.AbstractProcess;
 import process.Shell;
 
@@ -96,7 +97,7 @@ public class Kernel {
 			Class<?>[] types = new Class[arguments.length];				// Types of arguments
 			types[0] = int.class;										// First always pid
 			types[1] = int.class;										// Second always father pid
-			types[2] = PipedInputStream.class;							// Third always input stream
+			types[2] = BBInputStream.class;							// Third always input stream
 			types[3] = List.class;										// Fourth always List with rest of commands
 			types[4] = Shell.class;										// Fifth always shell
 			for(int i = 5; i < arguments.length; i++) types[i] = arguments[i].getClass();	// Fills optional arguments

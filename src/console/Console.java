@@ -1,5 +1,6 @@
 package console;
 
+import helpers.BBOutputStream;
 import process.Shell;
 
 import javax.swing.*;
@@ -21,7 +22,7 @@ public class Console extends JTextPane {
     /** Commands history */
     private ConsoleHistory history = new ConsoleHistory();
     /** Stream with shell */
-    private PipedOutputStream output;
+    private BBOutputStream output;
     /** State of console (inside command or not)  */
     private boolean inCommand;
     /** This constant defines, how many lines are stored in memory. */
@@ -43,7 +44,7 @@ public class Console extends JTextPane {
         this.addKeyListener(new CommandsKeyListener());
         this.setText("");
         this.setCaretPosition(this.getDocument().getLength());
-        this.output = new PipedOutputStream();
+        this.output = new BBOutputStream();
         this.shell = shell;
         this.shell.setConsoleInput(output);
         this.inCommand = false;

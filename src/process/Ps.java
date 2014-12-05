@@ -1,5 +1,6 @@
 package process;
 
+import helpers.BBInputStream;
 import kernel.Kernel;
 
 import java.io.IOException;
@@ -24,7 +25,7 @@ public class Ps extends AbstractProcess {
      * @param commands list of commands
      * @param shell parent shell
      */
-    public Ps(int pid, int parentPid, PipedInputStream input, List<List<String>> commands, Shell shell) {
+    public Ps(int pid, int parentPid, BBInputStream input, List<List<String>> commands, Shell shell) {
         super(pid, parentPid, input, commands, shell);
     }
 

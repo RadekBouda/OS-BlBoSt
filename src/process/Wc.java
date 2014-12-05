@@ -1,5 +1,7 @@
 package process;
 
+import helpers.BBInputStream;
+
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.util.List;
@@ -20,7 +22,7 @@ public class Wc extends AbstractProcess {
      * @param commands list with commands
      * @param shell parent shell
      */
-    public Wc(int pid, int parentPid, PipedInputStream input, List<List<String>> commands, Shell shell) {
+    public Wc(int pid, int parentPid, BBInputStream input, List<List<String>> commands, Shell shell) {
         super(pid, parentPid, input, commands, shell);
     }
 
