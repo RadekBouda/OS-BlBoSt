@@ -25,7 +25,15 @@ public class Cat extends AbstractProcess {
      */
     public Cat(int pid, int parentPid, PipedInputStream input, List<List<String>> commands, Shell shell, String path) {
         super(pid, parentPid, input, commands, shell);
-        this.path = shell.getPath(path);
+
+        if(path.equalsIgnoreCase(AbstractProcess.HELP_COMMAND)){
+            helpOnly = true;
+            this.path = null
+        } else {
+            helpOnly = false;
+            this.path = shell.getPath(path);
+        }
+
     }
 
     /**
@@ -47,6 +55,15 @@ public class Cat extends AbstractProcess {
      */
     @Override
     protected void processRun() {
+        if(helpOnly){
+            try {
+                output.write(getMan().getBytes());
+                output.close();
+                return;
+            } catch (IOException e){
+                return;
+            }
+        }
         if(path == null) {
             if(hasPipedInput()) pipedVersion();
             else stdinVersion();

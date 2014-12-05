@@ -33,6 +33,10 @@ public abstract class AbstractProcess extends Thread {
 
 	/** Pipe buffer size. 4MB */
 	public static final int PIPE_BUFFER_SIZE = 4194304;
+	/** This command can be used to show process's help. */
+	public static final String HELP_COMMAND = "--help";
+	/** If process can have a parameter, this field show whether it is a HELP_COMMAND or not. */
+	protected boolean helpOnly;
 
 	/**
 	 * Default constructor with default settings.
