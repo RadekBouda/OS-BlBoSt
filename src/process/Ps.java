@@ -4,9 +4,9 @@ import helpers.BBPipedInputStream;
 import kernel.Kernel;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Ps process serves as observer of processes in OS.
@@ -53,7 +53,9 @@ public class Ps extends AbstractProcess {
      * @return record with information
      */
     private String getRecord(AbstractProcess process) {
-        return process.getPid() + "\t" + process.getParentPid() + '\t' + process.getStartTime() + '\t' + process.getClass() + '\n';
+        Date d = new Date(process.getStartTime());
+        DateFormat formatter = new SimpleDateFormat("");
+        return process.getPid() + "\t" + process.getParentPid() + '\t' + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM).format(d) + "\t" + process.getClass().toString().split("\\.")[1] + '\n';
     }
 
     /**
@@ -62,7 +64,7 @@ public class Ps extends AbstractProcess {
      * @return headers.
      */
     private String getHeaders() {
-        return "PID\tParent Pid\tStart time\tProcess name\n";
+        return "PID\tParent Pid\tStart time\t\tProcess name\n";
     }
     
     /**
